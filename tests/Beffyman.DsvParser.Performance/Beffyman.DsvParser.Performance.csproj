@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>netcoreapp3.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BenchmarkDotNet" Version="0.11.4" />
+		<PackageReference Include="CsvHelper" Version="12.1.2" />
+		<PackageReference Include="CsvTextFieldParser" Version="1.1.1" />
+		<PackageReference Include="FileHelpers" Version="3.4.0" />
+		<PackageReference Include="TinyCsvParser" Version="2.2.0" />
+		<PackageReference Include="FastCsvParser" Version="1.1.1" />
+		<PackageReference Include="DelimiterSeparatedTextParser " Version="0.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Beffyman.DsvParser\Beffyman.DsvParser.csproj" />
+	</ItemGroup>
+
+</Project>

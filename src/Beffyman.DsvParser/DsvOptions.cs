@@ -15,6 +15,11 @@ namespace Beffyman.DsvParser
 		public readonly char Delimiter;
 
 		/// <summary>
+		/// What is the character that will be used to indicate that the column is being escaped
+		/// </summary>
+		public readonly char EscapeChar;
+
+		/// <summary>
 		/// Value of the LineBreak that is to be detected
 		/// </summary>
 		public readonly string LineBreak;
@@ -42,13 +47,15 @@ namespace Beffyman.DsvParser
 		/// Full Options list
 		/// </summary>
 		/// <param name="delimiter"></param>
-		/// <param name="hasHeaders"></param>
+		/// <param name="escapeChar"></param>
 		/// <param name="lineBreak"></param>
+		/// <param name="hasHeaders"></param>
 		/// <param name="knownColumns"></param>
 		/// <param name="knownRows"></param>
-		public DsvOptions(char delimiter, string lineBreak, bool hasHeaders, int knownColumns, int knownRows)
+		public DsvOptions(char delimiter, char escapeChar, string lineBreak, bool hasHeaders, int knownColumns, int knownRows)
 		{
 			Delimiter = delimiter;
+			EscapeChar = escapeChar;
 			LineBreak = lineBreak;
 			HasHeaders = hasHeaders;
 			KnownColumns = knownColumns;
@@ -59,10 +66,12 @@ namespace Beffyman.DsvParser
 		/// Easiest option for an unknown file with columns
 		/// </summary>
 		/// <param name="delimiter"></param>
+		/// <param name="escapeChar"></param>
 		/// <param name="lineBreak"></param>
-		public DsvOptions(char delimiter, string lineBreak)
+		public DsvOptions(char delimiter, char escapeChar, string lineBreak)
 		{
 			Delimiter = delimiter;
+			EscapeChar = escapeChar;
 			LineBreak = lineBreak;
 			HasHeaders = true;
 			KnownColumns = 0;
@@ -73,10 +82,13 @@ namespace Beffyman.DsvParser
 		/// Easiest option for an unknown file
 		/// </summary>
 		/// <param name="delimiter"></param>
+		/// <param name="escapeChar"></param>
 		/// <param name="lineBreak"></param>
-		public DsvOptions(char delimiter, string lineBreak, bool hasHeaders)
+		/// <param name="hasHeaders"></param>
+		public DsvOptions(char delimiter, char escapeChar, string lineBreak, bool hasHeaders)
 		{
 			Delimiter = delimiter;
+			EscapeChar = escapeChar;
 			HasHeaders = hasHeaders;
 			LineBreak = lineBreak;
 			KnownColumns = 0;
@@ -86,17 +98,17 @@ namespace Beffyman.DsvParser
 		/// <summary>
 		/// Default CSV options, comma separated, has headers, uses \r\n as the line break, and has 0 knowns
 		/// </summary>
-		public readonly static DsvOptions DefaultCsvOptions = new DsvOptions(',', "\r\n");
+		public readonly static DsvOptions DefaultCsvOptions = new DsvOptions(',', '"', "\r\n");
 
 		/// <summary>
 		/// Default CSV options, tab separated, has headers, uses \r\n as the line break, and has 0 knowns
 		/// </summary>
-		public readonly static DsvOptions DefaultTsvOptions = new DsvOptions('\t', "\r\n");
+		public readonly static DsvOptions DefaultTsvOptions = new DsvOptions('\t', '"', "\r\n");
 
 		/// <summary>
 		/// Default CSV options, pipe separated, has headers, uses \r\n as the line break, and has 0 knowns
 		/// </summary>
-		public readonly static DsvOptions DefaultPsvOptions = new DsvOptions('|', "\r\n");
+		public readonly static DsvOptions DefaultPsvOptions = new DsvOptions('|', '"', "\r\n");
 
 	}
 }

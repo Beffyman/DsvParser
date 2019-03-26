@@ -65,7 +65,6 @@ namespace Beffyman.DsvParser
 			//bool lastWasQuote = false;
 
 			//Need to account for the following
-			//Delimiters
 			//Quotes
 			//Escaped Quotes
 			//Escaped Delimiters
@@ -93,6 +92,10 @@ namespace Beffyman.DsvParser
 			Span<ReadOnlyMemory<string>> rows = default;
 			Memory<string> row = default;
 
+
+			bool escaping = false;
+
+
 			if (options.KnownRows != 0)
 			{
 				checkRowBounds = false;
@@ -116,18 +119,35 @@ namespace Beffyman.DsvParser
 					//TODO: Escaped Delimiters
 					if (dsv[i] == options.Delimiter)
 					{
-						columns++;
+						if (!escaping)
+						{
+							columns++;
+						}
+					}
+					else if (dsv[i] == options.EscapeChar)
+					{
+						if (!escaping)
+						{
+							escaping = true;
+						}
+						else
+						{
+
+						}
 					}
 					else
 					{
-						if (CheckLineFeed(dsv, lineBreak, i))
+						if (!escaping)
 						{
-							//When we match the line feed we know we have all the columns we need, end the first pass and reset the index
-							firstPass = false;
-							columns++;
-							headers = new Span<string>(new string[columns]);
-							row = new Memory<string>(new string[columns]);
-							i = 0;
+							if (CheckLineFeed(dsv, lineBreak, i))
+							{
+								//When we match the line feed we know we have all the columns we need, end the first pass and reset the index
+								firstPass = false;
+								columns++;
+								headers = new Span<string>(new string[columns]);
+								row = new Memory<string>(new string[columns]);
+								i = 0;
+							}
 						}
 					}
 				}
