@@ -75,13 +75,7 @@ namespace Beffyman.DsvParser
 
 			//Could probably get better performance with a switch, but would need constant delimiter
 			bool firstPass = columns == 0;
-			/*
-			Steps
-			1) If KnownColumns is provided, then allocate then skip the first pass since we know how big to make the columns span else follow 1a
-				1a) Run through first line until the LineFeed, then reset i to 0 so we know how many columns there are.
-				1b) Allocate a span so hold the columns, then start parsing
-			2) Allocate a
-			 */
+
 			bool headersFilled = false;
 			Span<string> headers = default;
 
@@ -94,6 +88,8 @@ namespace Beffyman.DsvParser
 
 
 			bool escaping = false;
+			bool didEscape = false;
+			bool escapedEscapeChar = false;
 
 
 			if (options.KnownRows != 0)
@@ -109,9 +105,17 @@ namespace Beffyman.DsvParser
 				row = new Memory<string>(new string[columns]);
 			}
 
+#if DEBUG
+			string tracker = string.Empty;
+#endif
+
 			int lastDelimiter = 0;
 			for (int i = 0; i < dsv.Length; i++)
 			{
+#if DEBUG
+				tracker += dsv[i];
+#endif
+
 				//On first pass we operate differently as we just want to find out how many columns there are
 				if (firstPass)
 				{
@@ -121,32 +125,57 @@ namespace Beffyman.DsvParser
 					{
 						if (!escaping)
 						{
+							lastDelimiter = i;
 							columns++;
 						}
 					}
 					else if (dsv[i] == options.EscapeChar)
 					{
+						//Need to figure out if we are already escaping, if not, then escape
 						if (!escaping)
 						{
 							escaping = true;
 						}
+						//So this only gets hit if we have ",  and nothing like "", which would be in the middle of a cell, we need to make sure the quote is alone before the delimiter
+						else if ((i + 1) < dsv.Length && (dsv[i + 1] == options.Delimiter || CheckLineFeed(dsv, lineBreak, i + lineBreak.Length + 1))
+							&& !escapedEscapeChar
+							&& dsv[i - 1] != options.EscapeChar)
+						{
+							escaping = false;
+						}
+						else if (!escapedEscapeChar)
+						{
+							escapedEscapeChar = true;
+						}
 						else
 						{
-
+							escapedEscapeChar = false;
 						}
 					}
 					else
 					{
+						if (escapedEscapeChar)
+						{
+							//TODO: Make static method to throw so method can be Jitted
+							throw new FormatException("An escape character was detected in the cell as part of it but no escape character was after it.");
+						}
+
 						if (!escaping)
 						{
-							if (CheckLineFeed(dsv, lineBreak, i))
+							if ((i + 1) < dsv.Length && CheckLineFeed(dsv, lineBreak, i + 1))
 							{
 								//When we match the line feed we know we have all the columns we need, end the first pass and reset the index
 								firstPass = false;
 								columns++;
 								headers = new Span<string>(new string[columns]);
 								row = new Memory<string>(new string[columns]);
-								i = 0;
+								i = -1;//For loop will add one after this so we need to start back at 0
+								escaping = false;
+								didEscape = false;
+								lastDelimiter = 0;
+#if DEBUG
+								tracker = string.Empty;
+#endif
 							}
 						}
 					}
@@ -156,49 +185,113 @@ namespace Beffyman.DsvParser
 					//Check if we have a delimiter
 					if (dsv[i] == options.Delimiter)
 					{
-						//If we do, then slice out the chars from until the last one we found.
-						row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter).ToString();
-						columnCount++;
-						lastDelimiter = i + 1;
+						if (!escaping)
+						{
+							//If we do, then slice out the chars from until the last one we found.
+							if (didEscape)
+							{
+								row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, i - lastDelimiter - 2).ToString();
+							}
+							else
+							{
+								row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter).ToString();
+							}
+
+							columnCount++;
+							lastDelimiter = i + 1;
+							didEscape = false;
+						}
 					}
 					else if (i == dsv.Length - 1)
 					{
 						//Finalize
-						row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length + 1).ToString();
+
+						if (escaping)
+						{
+							//This entry was escaped, that means we need to remove 1 from each side
+							row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, i - lastDelimiter - lineBreak.Length + 1).ToString();
+						}
+						else
+						{
+							row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length + 1).ToString();
+						}
+
+						didEscape = false;
 						rows[rowCount] = row;
 						rowCount++;
 					}
+					else if (dsv[i] == options.EscapeChar)
+					{
+						//Need to figure out if we are already escaping, if not, then escape
+						if (!escaping)
+						{
+							didEscape = true;
+							escaping = true;
+						}
+						//So this only gets hit if we have ",  and nothing like "", which would be in the middle of a cell, we need to make sure the quote is alone before the delimiter
+						else if ((i + 1) < dsv.Length && (dsv[i + 1] == options.Delimiter || CheckLineFeed(dsv, lineBreak, i + lineBreak.Length + 1))
+							&& !escapedEscapeChar
+							&& dsv[i - 1] != options.EscapeChar)
+						{
+							escaping = false;
+						}
+						else if (!escapedEscapeChar)
+						{
+							escapedEscapeChar = true;
+						}
+						else
+						{
+							escapedEscapeChar = false;
+						}
+					}
 					else
 					{
-						if (CheckLineFeed(dsv, lineBreak, i))
+						if (escapedEscapeChar)
 						{
-							row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length).ToString();
-							//columnCount++;
+							//TODO: Make static method to throw so method can be Jitted
+							throw new FormatException("An escape character was detected in the cell as part of it but no escape character was after it.");
+						}
 
-							//Need to check if we need to expand the Rows Span
-							if (checkRowBounds)
+						if (!escaping)
+						{
+							if ((i + 1) < dsv.Length && CheckLineFeed(dsv, lineBreak, i + 1))
 							{
-								ExpandRowAllocation(ref rows, rowCount);
-							}
+								if (escaping)
+								{
+									//This entry was escaped, that means we need to remove 1 from each side
+									row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, i - lastDelimiter - lineBreak.Length - 1).ToString();
+								}
+								else
+								{
+									row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length + 1).ToString();
+								}
+								//columnCount++;
 
-							//Check if we need to place the headers in
-							if (options.HasHeaders && !headersFilled)
-							{
-								headers = row.Span;
-								headersFilled = true;
-							}
-							else
-							{
-								//Place row inside span
-								rows[rowCount] = row;
-								rowCount++;
-							}
+								//Need to check if we need to expand the Rows Span
+								if (checkRowBounds)
+								{
+									ExpandRowAllocation(ref rows, rowCount);
+								}
 
-							//Start up a new Row
-							row = new Memory<string>(new string[columns]);
-							//We treat the LineFeed as a delimiter as the last delimiter was before it
-							lastDelimiter = i;
-							columnCount = 0;
+								//Check if we need to place the headers in
+								if (options.HasHeaders && !headersFilled)
+								{
+									headers = row.Span;
+									headersFilled = true;
+								}
+								else
+								{
+									//Place row inside span
+									rows[rowCount] = row;
+									rowCount++;
+								}
+
+								//Start up a new Row
+								row = new Memory<string>(new string[columns]);
+								//We treat the LineFeed as a delimiter as the last delimiter was before it
+								lastDelimiter = i + 1;
+								columnCount = 0;
+							}
 						}
 					}
 				}

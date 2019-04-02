@@ -39,7 +39,7 @@ public class BuildScript : NukeBuild
 	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 
 	Target Pack => _ => _
-		.DependsOn(Build)
+		.DependsOn(Test)
 		.Executes(() =>
 		{
 			DotNetPack(s => s.SetProject(Solution)
@@ -63,8 +63,24 @@ public class BuildScript : NukeBuild
 				.SetProjectFile(Solution));
 		});
 
+	Target Restore => _ => _
+		.DependsOn(Clean)
+		.Executes(() =>
+		{
+			DotNetRestore(s => s
+				.SetProjectFile(Solution));
+		});
+
+	Target Clean => _ => _
+		.Executes(() =>
+		{
+			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+			EnsureCleanDirectory(ArtifactsDirectory);
+		});
 
 	Target Build => _ => _
+		.DependsOn(Restore)
 		.Executes(() =>
 		{
 			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);

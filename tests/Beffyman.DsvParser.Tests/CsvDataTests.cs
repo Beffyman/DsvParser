@@ -82,34 +82,34 @@ namespace Beffyman.DsvParser.Tests
 			}
 		}
 
-		[Fact]
-		public void SimpleData_Huge()
-		{
-			string file = FileGenerator("Column", "Data", 50000, 3);
+		//[Fact]
+		//public void SimpleData_Huge()
+		//{
+		//	string file = FileGenerator("Column", "Data", 50000, 3);
 
-			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
+		//	var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
 
-			Assert.Equal(3, data.Headers.Length);
-			Assert.Equal(50000, data.Rows.Length);
+		//	Assert.Equal(3, data.Headers.Length);
+		//	Assert.Equal(50000, data.Rows.Length);
 
-			Assert.Equal("Column1", data.Headers[0]);
-			Assert.Equal("Column2", data.Headers[1]);
-			Assert.Equal("Column3", data.Headers[2]);
+		//	Assert.Equal("Column1", data.Headers[0]);
+		//	Assert.Equal("Column2", data.Headers[1]);
+		//	Assert.Equal("Column3", data.Headers[2]);
 
-			for (int i = 0; i < 50000; i++)
-			{
-				Assert.Equal("Data1", data.Rows[i].Span[0]);
-				Assert.Equal("Data2", data.Rows[i].Span[1]);
-				Assert.Equal("Data3", data.Rows[i].Span[2]);
-			}
-		}
+		//	for (int i = 0; i < 50000; i++)
+		//	{
+		//		Assert.Equal("Data1", data.Rows[i].Span[0]);
+		//		Assert.Equal("Data2", data.Rows[i].Span[1]);
+		//		Assert.Equal("Data3", data.Rows[i].Span[2]);
+		//	}
+		//}
 
 
 
 		[Fact]
 		public void EscapedDelimiter()
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da,ta1\",\"Da,ta2\",\"Da,ta3\",";
+			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da,ta1\",\"Da,ta2\",\"Da,ta3\"";
 
 			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
 
@@ -121,15 +121,15 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Column2", data.Headers[1]);
 			Assert.Equal("Column3", data.Headers[2]);
 
-			Assert.Equal("\"Da,ta1\"", data.Rows[0].Span[0]);
-			Assert.Equal("\"Da,ta2\"", data.Rows[0].Span[1]);
-			Assert.Equal("\"Da,ta3\"", data.Rows[0].Span[2]);
+			Assert.Equal("Da,ta1", data.Rows[0].Span[0]);
+			Assert.Equal("Da,ta2", data.Rows[0].Span[1]);
+			Assert.Equal("Da,ta3", data.Rows[0].Span[2]);
 		}
 
 		[Fact]
 		public void EscapedLineFeed()
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da{Environment.NewLine}ta1\",\"Da{Environment.NewLine}ta2\",\"Da{Environment.NewLine}ta3\",";
+			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da{Environment.NewLine}ta1\",\"Da{Environment.NewLine}ta2\",\"Da{Environment.NewLine}ta3\"";
 
 			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
 
@@ -141,16 +141,16 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Column2", data.Headers[1]);
 			Assert.Equal("Column3", data.Headers[2]);
 
-			Assert.Equal($"\"Da{Environment.NewLine}ta1\"", data.Rows[0].Span[0]);
-			Assert.Equal($"\"Da{Environment.NewLine}ta2\"", data.Rows[0].Span[1]);
-			Assert.Equal($"\"Da{Environment.NewLine}ta3\"", data.Rows[0].Span[2]);
+			Assert.Equal($"Da{Environment.NewLine}ta1", data.Rows[0].Span[0]);
+			Assert.Equal($"Da{Environment.NewLine}ta2", data.Rows[0].Span[1]);
+			Assert.Equal($"Da{Environment.NewLine}ta3", data.Rows[0].Span[2]);
 		}
 
 
 		[Fact]
 		public void EscapedEscape_Data()
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"ta1\",\"Da\"\"ta2\",\"Da\"\"ta3\",";
+			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"ta1\",\"Da\"\"ta2\",\"Da\"\"ta3\"";
 
 			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
 
@@ -162,16 +162,16 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Column2", data.Headers[1]);
 			Assert.Equal("Column3", data.Headers[2]);
 
-			Assert.Equal("\"Da\"\"ta1\"", data.Rows[0].Span[0]);
-			Assert.Equal("\"Da\"\"ta2\"", data.Rows[0].Span[1]);
-			Assert.Equal("\"Da\"\"ta3\"", data.Rows[0].Span[2]);
+			Assert.Equal("Da\"ta1", data.Rows[0].Span[0]);
+			Assert.Equal("Da\"ta2", data.Rows[0].Span[1]);
+			Assert.Equal("Da\"ta3", data.Rows[0].Span[2]);
 		}
 
 
 		[Fact]
 		public void EscapedEscape_Columns()
 		{
-			string file = $"\"Column\"\"1\",\"Column\"\"2\",\"Column\"\"3\"{Environment.NewLine}Data1,Data2,Data3,";
+			string file = $"\"Column\"\"1\",\"Column\"\"2\",\"Column\"\"3\"{Environment.NewLine}Data1,Data2,Data3";
 
 			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
 
@@ -179,12 +179,63 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal(3, data.Headers.Length);
 			Assert.Equal(1, data.Rows.Length);
 
-			Assert.Equal("Column\"\"1", data.Headers[0]);
-			Assert.Equal("Column\"\"2", data.Headers[1]);
-			Assert.Equal("Column\"\"3", data.Headers[2]);
+			Assert.Equal("Column\"1", data.Headers[0]);
+			Assert.Equal("Column\"2", data.Headers[1]);
+			Assert.Equal("Column\"3", data.Headers[2]);
 
 			Assert.Equal("Data1", data.Rows[0].Span[0]);
 			Assert.Equal("Data2", data.Rows[0].Span[1]);
+			Assert.Equal("Data3", data.Rows[0].Span[2]);
+		}
+
+		[Fact]
+		public void MalformedHeader_SingleQuoteInMiddle()
+		{
+			string file = $"\"Col\"umn1\",Column2,Column3{Environment.NewLine},,";
+
+			Assert.Throws<FormatException>(() =>
+			{
+				var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
+			});
+		}
+
+		[Fact]
+		public void EscapedEscape_Multiple()
+		{
+			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"\"\"ta1\",\"Data2\"\"\"\"\",\"\"\"\"\"Da\"\"ta3\"";
+
+			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
+
+
+			Assert.Equal(3, data.Headers.Length);
+			Assert.Equal(1, data.Rows.Length);
+
+			Assert.Equal("Column1", data.Headers[0]);
+			Assert.Equal("Column2", data.Headers[1]);
+			Assert.Equal("Column3", data.Headers[2]);
+
+			Assert.Equal("Da\"\"ta1", data.Rows[0].Span[0]);
+			Assert.Equal("Data2\"\"", data.Rows[0].Span[1]);
+			Assert.Equal("\"\"Da\"ta3", data.Rows[0].Span[2]);
+		}
+
+		[Fact]
+		public void EmptyDataFields()
+		{
+			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,,Data3";
+
+			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
+
+
+			Assert.Equal(3, data.Headers.Length);
+			Assert.Equal(1, data.Rows.Length);
+
+			Assert.Equal("Column1", data.Headers[0]);
+			Assert.Equal("Column2", data.Headers[1]);
+			Assert.Equal("Column3", data.Headers[2]);
+
+			Assert.Equal("Data1", data.Rows[0].Span[0]);
+			Assert.Null(data.Rows[0].Span[1]);
 			Assert.Equal("Data3", data.Rows[0].Span[2]);
 		}
 	}
