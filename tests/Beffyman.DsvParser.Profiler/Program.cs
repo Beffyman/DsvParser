@@ -40,7 +40,7 @@ namespace Beffyman.DsvParser.Profiler
 
 		static void Main(string[] args)
 		{
-			var file = FileGenerator("Column", "Data", 10000000, 10);
+			var file = FileGenerator("Column", "Data", 1000000, 50);
 			var data = new DsvData(file.AsMemory(), DsvOptions.DefaultCsvOptions);
 
 		}

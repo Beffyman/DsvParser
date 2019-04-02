@@ -15,7 +15,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
-public class BuildScript : NukeBuild
+public class BuildScripts : NukeBuild
 {
 	/*
 	/// Support plugins are available for:
@@ -25,7 +25,7 @@ public class BuildScript : NukeBuild
 	///   - Microsoft VSCode           https://nuke.build/vscode
 	*/
 
-	public static int Main() => Execute<BuildScript>(x => x.Build);
+	public static int Main() => Execute<BuildScripts>(x => x.Pack);
 
 	[Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
 	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
@@ -37,6 +37,8 @@ public class BuildScript : NukeBuild
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 	AbsolutePath TestsDirectory => RootDirectory / "tests";
 	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+
+	AbsolutePath PerformanceProject => TestsDirectory / "Beffyman.DsvParser.Performance";
 
 	Target Pack => _ => _
 		.DependsOn(Test)
@@ -63,8 +65,15 @@ public class BuildScript : NukeBuild
 				.SetProjectFile(Solution));
 		});
 
+	Target PerfTest => _ => _
+		.DependsOn(Build)
+		.Executes(() =>
+		{
+			DotNetRun(s => s.SetConfiguration(Configuration.Release)
+				.SetWorkingDirectory(PerformanceProject));
+		});
+
 	Target Restore => _ => _
-		.DependsOn(Clean)
 		.Executes(() =>
 		{
 			DotNetRestore(s => s
@@ -80,16 +89,10 @@ public class BuildScript : NukeBuild
 		});
 
 	Target Build => _ => _
+		.DependsOn(Clean)
 		.DependsOn(Restore)
 		.Executes(() =>
 		{
-			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			EnsureCleanDirectory(ArtifactsDirectory);
-
-			DotNetRestore(s => s
-				.SetProjectFile(Solution));
-
 			DotNetBuild(s => s
 				.SetProjectFile(Solution)
 				.SetConfiguration(Configuration)
