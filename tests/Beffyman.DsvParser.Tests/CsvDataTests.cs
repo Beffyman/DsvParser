@@ -235,7 +235,27 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Column3", data.Headers[2]);
 
 			Assert.Equal("Data1", data.Rows[0].Span[0]);
-			Assert.Null(data.Rows[0].Span[1]);
+			Assert.Equal("", data.Rows[0].Span[1]);
+			Assert.Equal("Data3", data.Rows[0].Span[2]);
+		}
+
+		[Fact]
+		public void EndsWithNewLine()
+		{
+			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2,Data3{Environment.NewLine}";
+
+			var data = new DsvData(file, DsvOptions.DefaultCsvOptions);
+
+
+			Assert.Equal(3, data.Headers.Length);
+			Assert.Equal(1, data.Rows.Length);
+
+			Assert.Equal("Column1", data.Headers[0]);
+			Assert.Equal("Column2", data.Headers[1]);
+			Assert.Equal("Column3", data.Headers[2]);
+
+			Assert.Equal("Data1", data.Rows[0].Span[0]);
+			Assert.Equal("Data2", data.Rows[0].Span[1]);
 			Assert.Equal("Data3", data.Rows[0].Span[2]);
 		}
 	}

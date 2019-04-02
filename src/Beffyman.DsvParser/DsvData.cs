@@ -90,6 +90,7 @@ namespace Beffyman.DsvParser
 			bool escaping = false;
 			bool didEscape = false;
 			bool escapedEscapeChar = false;
+			bool didEscapeEscapeChar = false;
 
 
 			if (options.KnownRows != 0)
@@ -104,6 +105,9 @@ namespace Beffyman.DsvParser
 				headers = new Span<string>(new string[columns]);
 				row = new Memory<string>(new string[columns]);
 			}
+
+			var doubleEscapeChar = new string(new char[] { options.EscapeChar, options.EscapeChar });
+			var escapeCharAsString = new string(new char[] { options.EscapeChar });
 
 #if DEBUG
 			string tracker = string.Empty;
@@ -146,6 +150,7 @@ namespace Beffyman.DsvParser
 						else if (!escapedEscapeChar)
 						{
 							escapedEscapeChar = true;
+							didEscapeEscapeChar = true;
 						}
 						else
 						{
@@ -156,8 +161,7 @@ namespace Beffyman.DsvParser
 					{
 						if (escapedEscapeChar)
 						{
-							//TODO: Make static method to throw so method can be Jitted
-							throw new FormatException("An escape character was detected in the cell as part of it but no escape character was after it.");
+							ThrowInvalidEscapedEscapeChar();
 						}
 
 						if (!escaping)
@@ -171,6 +175,7 @@ namespace Beffyman.DsvParser
 								row = new Memory<string>(new string[columns]);
 								i = -1;//For loop will add one after this so we need to start back at 0
 								escaping = false;
+								didEscapeEscapeChar = false;
 								didEscape = false;
 								lastDelimiter = 0;
 #if DEBUG
@@ -185,11 +190,12 @@ namespace Beffyman.DsvParser
 					//Check if we have a delimiter
 					if (dsv[i] == options.Delimiter)
 					{
-						if (!escaping)
+						if (!escaping || (escaping && escapedEscapeChar))
 						{
 							//If we do, then slice out the chars from until the last one we found.
 							if (didEscape)
 							{
+								//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
 								row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, i - lastDelimiter - 2).ToString();
 							}
 							else
@@ -197,26 +203,54 @@ namespace Beffyman.DsvParser
 								row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter).ToString();
 							}
 
-							columnCount++;
+							if (didEscapeEscapeChar)
+							{
+								//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+								row.Span[columnCount] = row.Span[columnCount].Replace(doubleEscapeChar, escapeCharAsString);
+							}
+
 							lastDelimiter = i + 1;
+							columnCount++;
 							didEscape = false;
 						}
 					}
 					else if (i == dsv.Length - 1)
 					{
 						//Finalize
-
 						if (escaping)
 						{
-							//This entry was escaped, that means we need to remove 1 from each side
-							row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, i - lastDelimiter - lineBreak.Length + 1).ToString();
+							if (CheckLineFeed(dsv, lineBreak, i + 1))
+							{
+								//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
+								row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, (dsv.Length - lastDelimiter - lineBreak.Length) - 1).ToString();
+							}
+							else
+							{
+								//Take 1 off both sides and 1 more as we are still escaping
+								row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, (dsv.Length - lastDelimiter) - 2).ToString();
+							}
+
 						}
 						else
 						{
-							row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length + 1).ToString();
+							if (CheckLineFeed(dsv, lineBreak, i + 1))
+							{
+								row.Span[columnCount] = dsv.Slice(lastDelimiter, dsv.Length - lastDelimiter - lineBreak.Length).ToString();
+							}
+							else
+							{
+								row.Span[columnCount] = dsv.Slice(lastDelimiter, dsv.Length - lastDelimiter).ToString();
+							}
+						}
+
+						if (didEscapeEscapeChar)
+						{
+							//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+							row.Span[columnCount] = row.Span[columnCount].Replace(doubleEscapeChar, escapeCharAsString);
 						}
 
 						didEscape = false;
+						didEscapeEscapeChar = false;
 						rows[rowCount] = row;
 						rowCount++;
 					}
@@ -238,6 +272,7 @@ namespace Beffyman.DsvParser
 						else if (!escapedEscapeChar)
 						{
 							escapedEscapeChar = true;
+							didEscapeEscapeChar = true;
 						}
 						else
 						{
@@ -248,8 +283,7 @@ namespace Beffyman.DsvParser
 					{
 						if (escapedEscapeChar)
 						{
-							//TODO: Make static method to throw so method can be Jitted
-							throw new FormatException("An escape character was detected in the cell as part of it but no escape character was after it.");
+							ThrowInvalidEscapedEscapeChar();
 						}
 
 						if (!escaping)
@@ -263,8 +297,24 @@ namespace Beffyman.DsvParser
 								}
 								else
 								{
-									row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length + 1).ToString();
+									if (didEscape)
+									{
+										row.Span[columnCount] = dsv.Slice(lastDelimiter + 1, i - lastDelimiter - lineBreak.Length - 1).ToString();
+									}
+									else
+									{
+										row.Span[columnCount] = dsv.Slice(lastDelimiter, i - lastDelimiter - lineBreak.Length + 1).ToString();
+									}
+
 								}
+
+
+								if (didEscapeEscapeChar)
+								{
+									//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+									row.Span[columnCount] = row.Span[columnCount].Replace(doubleEscapeChar, escapeCharAsString);
+								}
+
 								//columnCount++;
 
 								//Need to check if we need to expand the Rows Span
@@ -286,6 +336,8 @@ namespace Beffyman.DsvParser
 									rowCount++;
 								}
 
+								didEscape = false;
+								didEscapeEscapeChar = false;
 								//Start up a new Row
 								row = new Memory<string>(new string[columns]);
 								//We treat the LineFeed as a delimiter as the last delimiter was before it
@@ -340,5 +392,11 @@ namespace Beffyman.DsvParser
 			return false;
 		}
 
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static void ThrowInvalidEscapedEscapeChar()
+		{
+			throw new FormatException("An escape character was detected in the cell as part of it but no escape character was after it.");
+		}
 	}
 }
