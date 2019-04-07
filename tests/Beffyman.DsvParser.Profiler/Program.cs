@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 
 namespace Beffyman.DsvParser.Profiler
@@ -16,7 +17,7 @@ namespace Beffyman.DsvParser.Profiler
 				{
 					builder.Append(',');
 				}
-				builder.Append($"{headerPrefix}{++x}");
+				builder.Append($"{headerPrefix}{(++x).ToString()}");
 			}
 
 			builder.AppendLine();
@@ -30,7 +31,7 @@ namespace Beffyman.DsvParser.Profiler
 					{
 						builder.Append(',');
 					}
-					builder.Append($"{dataPrefix}{++z}");
+					builder.Append($"{dataPrefix}{(++z).ToString()}");
 				}
 				builder.AppendLine();
 			}
@@ -40,9 +41,22 @@ namespace Beffyman.DsvParser.Profiler
 
 		static void Main(string[] args)
 		{
-			var file = FileGenerator("Column", "Data", 1000000, 50);
-			var data = new DsvData(file.AsMemory(), DsvOptions.DefaultCsvOptions);
+			//var file = FileGenerator("Column", "Data", 10000, 100);
+			var file = FileGenerator("Column", "Data", 1_000_000, 100);
+			//var file = FileGenerator("Column", "Data", 100_000_00, 10);
+			//var file = FileGenerator("Column", "Data", 100, 1_00_000);
 
+			Console.WriteLine("Done generating csv");
+
+			Stopwatch timer = new Stopwatch();
+			timer.Start();
+
+			var data = new DsvParser(file.AsMemory(), DsvOptions.DefaultCsvOptions);
+
+			Console.WriteLine("Elapsed Time");
+			Console.WriteLine(timer.Elapsed.TotalSeconds);
+			Console.WriteLine($"# of Columns = {data.Columns.Length.ToString()}");
+			Console.WriteLine($"# of Rows = {data.Rows.Length.ToString()}");
 		}
 	}
 }

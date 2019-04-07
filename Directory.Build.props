@@ -11,7 +11,7 @@
 		<Copyright>Copyright 2019</Copyright>
 		<Authors>Beffyman</Authors>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/Beffyman/CsvParser</RepositoryUrl>
+		<RepositoryUrl>https://github.com/Beffyman/DsvParser</RepositoryUrl>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<IncludeSource>true</IncludeSource>
 		<IncludeSymbols>true</IncludeSymbols>
