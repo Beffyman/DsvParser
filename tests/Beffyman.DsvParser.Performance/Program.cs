@@ -27,7 +27,7 @@ namespace Beffyman.DsvParser.Performance
 				{
 					builder.Append(',');
 				}
-				builder.Append($"{headerPrefix}{++x}");
+				builder.Append($"{headerPrefix}{(++x).ToString()}");
 			}
 
 			builder.AppendLine();
@@ -41,7 +41,7 @@ namespace Beffyman.DsvParser.Performance
 					{
 						builder.Append(',');
 					}
-					builder.Append($"{dataPrefix}{++z}");
+					builder.Append($"{dataPrefix}{(++z).ToString()}");
 				}
 				builder.AppendLine();
 			}
@@ -73,9 +73,9 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("MemoryFile")]
 		[Benchmark]
-		public DsvData Beffyman_DsvParser_MemoryFile()
+		public DsvParser Beffyman_DsvParser_MemoryFile()
 		{
-			return new DsvData(MemoryFile, DsvOptions.DefaultCsvOptions);
+			return new DsvParser(MemoryFile, DsvOptions.DefaultCsvOptions);
 		}
 
 		#endregion Beffyman.DsvParser
@@ -84,7 +84,7 @@ namespace Beffyman.DsvParser.Performance
 
 
 		[BenchmarkCategory("MemoryFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int DelimiterSeparatedTextParser_MemoryFile()
 		{
 			var totalLength = 0;
@@ -112,7 +112,7 @@ namespace Beffyman.DsvParser.Performance
 		private string[] NewLine = new string[] { Environment.NewLine };
 
 		[BenchmarkCategory("StringFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int TinyCsvParser_StringFile()
 		{
 			var totalLength = 0;
@@ -126,16 +126,16 @@ namespace Beffyman.DsvParser.Performance
 			foreach (var result in results)
 			{
 				var record = result.Result;
-				totalLength += record.Value0.Length;
-				totalLength += record.Value1.Length;
-				totalLength += record.Value2.Length;
-				totalLength += record.Value3.Length;
-				totalLength += record.Value4.Length;
-				totalLength += record.Value5.Length;
-				totalLength += record.Value6.Length;
-				totalLength += record.Value7.Length;
-				totalLength += record.Value8.Length;
-				totalLength += record.Value9.Length;
+				totalLength += record.column1.Length;
+				totalLength += record.column2.Length;
+				totalLength += record.column3.Length;
+				totalLength += record.column4.Length;
+				totalLength += record.column5.Length;
+				totalLength += record.column6.Length;
+				totalLength += record.column7.Length;
+				totalLength += record.column8.Length;
+				totalLength += record.column9.Length;
+				totalLength += record.column10.Length;
 			}
 
 			return totalLength;
@@ -145,16 +145,16 @@ namespace Beffyman.DsvParser.Performance
 		{
 			public TinyCsvRecordMapping()
 			{
-				this.MapProperty(0, x => x.Value0);
-				this.MapProperty(1, x => x.Value1);
-				this.MapProperty(2, x => x.Value2);
-				this.MapProperty(3, x => x.Value3);
-				this.MapProperty(4, x => x.Value4);
-				this.MapProperty(5, x => x.Value5);
-				this.MapProperty(6, x => x.Value6);
-				this.MapProperty(7, x => x.Value7);
-				this.MapProperty(8, x => x.Value8);
-				this.MapProperty(9, x => x.Value9);
+				this.MapProperty(0, x => x.column1);
+				this.MapProperty(1, x => x.column2);
+				this.MapProperty(2, x => x.column3);
+				this.MapProperty(3, x => x.column4);
+				this.MapProperty(4, x => x.column5);
+				this.MapProperty(5, x => x.column6);
+				this.MapProperty(6, x => x.column7);
+				this.MapProperty(7, x => x.column8);
+				this.MapProperty(8, x => x.column9);
+				this.MapProperty(9, x => x.column10);
 			}
 		}
 
@@ -165,7 +165,7 @@ namespace Beffyman.DsvParser.Performance
 		#region FastCsvParser
 
 		[BenchmarkCategory("ByteArrayFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int FastCsvParser_ByteArrayFile()
 		{
 			var totalLength = 0;
@@ -200,7 +200,7 @@ namespace Beffyman.DsvParser.Performance
 		#region CsvHelper
 
 		[BenchmarkCategory("StringFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int CsvHelper_StringFile()
 		{
 			var totalLength = 0;
@@ -228,7 +228,7 @@ namespace Beffyman.DsvParser.Performance
 		#region FileHelpers
 
 		[BenchmarkCategory("StringFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int FileHelpers_StringFile()
 		{
 			var totalLength = 0;
@@ -240,16 +240,16 @@ namespace Beffyman.DsvParser.Performance
 			for (var recordNum = 0; recordNum < numRecords; recordNum++)
 			{
 				var record = records[recordNum];
-				totalLength += record.Value0.Length;
-				totalLength += record.Value1.Length;
-				totalLength += record.Value2.Length;
-				totalLength += record.Value3.Length;
-				totalLength += record.Value4.Length;
-				totalLength += record.Value5.Length;
-				totalLength += record.Value6.Length;
-				totalLength += record.Value7.Length;
-				totalLength += record.Value8.Length;
-				totalLength += record.Value9.Length;
+				totalLength += record.column1.Length;
+				totalLength += record.column2.Length;
+				totalLength += record.column3.Length;
+				totalLength += record.column4.Length;
+				totalLength += record.column5.Length;
+				totalLength += record.column6.Length;
+				totalLength += record.column7.Length;
+				totalLength += record.column8.Length;
+				totalLength += record.column9.Length;
+				totalLength += record.column10.Length;
 			}
 
 			return totalLength;
@@ -259,25 +259,25 @@ namespace Beffyman.DsvParser.Performance
 		[FileHelpers.DelimitedRecord(",")]
 		private sealed class Record
 		{
-			public string Value0 { get; set; }
+			public string column1 { get; set; }
 
-			public string Value1 { get; set; }
+			public string column2 { get; set; }
 
-			public string Value2 { get; set; }
+			public string column3 { get; set; }
 
-			public string Value3 { get; set; }
+			public string column4 { get; set; }
 
-			public string Value4 { get; set; }
+			public string column5 { get; set; }
 
-			public string Value5 { get; set; }
+			public string column6 { get; set; }
 
-			public string Value6 { get; set; }
+			public string column7 { get; set; }
 
-			public string Value7 { get; set; }
+			public string column8 { get; set; }
 
-			public string Value8 { get; set; }
+			public string column9 { get; set; }
 
-			public string Value9 { get; set; }
+			public string column10 { get; set; }
 		}
 		#endregion FileHelpers
 
