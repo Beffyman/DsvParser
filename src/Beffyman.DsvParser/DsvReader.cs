@@ -298,50 +298,56 @@ namespace Beffyman.DsvParser
 						ThrowInvalidEscapedEscapeChar();
 					}
 
-					if (!escaping && (!_hasHeaders
-							|| ((_columnsFilled
-									&& _column == _columnCount)
-								|| !_columnsFilled)) && (index + 1) < _length
-								|| CheckLineFeed(dsv, index + 1))
+					if (!escaping)
 					{
-						if (escaping)
+						if (!_hasHeaders
+							|| (_columnsFilled
+									&& _column == _columnCount)
+								|| !_columnsFilled)
 						{
-							//This entry was escaped, that means we need to remove 1 from each side
-							nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+							if ((index + 1) < _length
+								&& CheckLineFeed(dsv, index + 1))
+							{
+								if (escaping)
+								{
+									//This entry was escaped, that means we need to remove 1 from each side
+									nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+								}
+								else if (didEscape)
+								{
+									nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+								}
+								else
+								{
+									nextValue = dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
+								}
+
+
+								if (didEscapeEscapeChar)
+								{
+									//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+									nextValue = nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+								}
+
+								//Check if we need to place the headers in
+								if (_hasHeaders && !_columnsFilled)
+								{
+									_columnCount++;
+									_columnsFilled = true;
+								}
+
+								_rowCount++;
+
+								didEscape = false;
+								didEscapeEscapeChar = false;
+								//Start up a new Row
+								//We treat the LineFeed as a delimiter as the last delimiter was before it
+								lastDelimiter = index + 1;
+								_newRowNextRead = true;
+
+								return true;
+							}
 						}
-						else if (didEscape)
-						{
-							nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
-						}
-						else
-						{
-							nextValue = dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
-						}
-
-
-						if (didEscapeEscapeChar)
-						{
-							//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
-							nextValue = nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
-						}
-
-						//Check if we need to place the headers in
-						if (_hasHeaders && !_columnsFilled)
-						{
-							_columnCount++;
-							_columnsFilled = true;
-						}
-
-						_rowCount++;
-
-						didEscape = false;
-						didEscapeEscapeChar = false;
-						//Start up a new Row
-						//We treat the LineFeed as a delimiter as the last delimiter was before it
-						lastDelimiter = index + 1;
-						_newRowNextRead = true;
-
-						return true;
 					}
 				}
 			}
