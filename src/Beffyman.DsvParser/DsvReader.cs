@@ -1,88 +1,37 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Beffyman.DsvParser
 {
-	public sealed class DsvReader
+	public sealed class DsvReader : IEnumerator<ReadOnlyMemory<char>>
 	{
 		public readonly DsvOptions Options;
 		public readonly ReadOnlyMemory<char> Input;
-		private readonly char[] dsv;
 
 		public int RowCount => _rowCount;
-		private int _rowCount;
-
 		public int ColumnCount => _columnCount;
-		private int _columnCount;
-
 		public int Column => _column;
-		private int _column;
-
 		public bool ColumnsFilled => _columnsFilled;
-		private bool _columnsFilled = false;
-
 		public bool NewRowNextRead => _newRowNextRead;
-		private bool _newRowNextRead;
 
+		public ReadOnlyMemory<char> Current => _nextValue;
+
+		object IEnumerator.Current => _nextValue;
+
+		private readonly char[] _dsv;
 		private readonly char _delimiter;
 		private readonly char _escapeChar;
 		private readonly bool _hasHeaders;
 		private readonly int _length;
 
-		/// <summary>
-		/// When you have a byte array and a known encoding.
-		/// Least performant option as it needs to parse the bytes as a string via the encoding then convert the string that comes back from that as a Span
-		/// </summary>
-		/// <param name="input"></param>
-		/// <param name="encoding"></param>
-		/// <param name="options"></param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(byte[] input, Encoding encoding, in DsvOptions options) : this(encoding.GetString(input), options) { }
-
-		/// <summary>
-		/// Converts the string into a span and then parses it
-		/// </summary>
-		/// <param name="input"></param>
-		/// <param name="options"></param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(string input, in DsvOptions options) : this(input.ToCharArray(), options) { }
-
-
-		/// <summary>
-		/// Converts the char array into a span and then parses it
-		/// </summary>
-		/// <param name="dsv"></param>
-		/// <param name="options"></param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(in ReadOnlySpan<char> input, in DsvOptions options) : this(input.ToArray(), options) { }
-
-		/// <summary>
-		/// Converts the char array into a span and then parses it
-		/// </summary>
-		/// <param name="input"></param>
-		/// <param name="options"></param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(char[] input, in DsvOptions options) : this(new Memory<char>(input), options) { }
-
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(in ReadOnlyMemory<char> input, in DsvOptions options)
-		{
-			Input = input;
-			dsv = input.ToArray();
-			Options = options;
-
-			doubleEscapeChar = new string(new char[] { options.EscapeChar, options.EscapeChar });
-			escapeCharAsString = new string(new char[] { options.EscapeChar });
-
-			_delimiter = Options.Delimiter;
-			_hasHeaders = Options.HasHeaders;
-			_escapeChar = Options.EscapeChar;
-			_length = dsv.Length;
-		}
-
+		private int _rowCount;
+		private int _columnCount;
+		private int _column;
+		private bool _columnsFilled = false;
+		private bool _newRowNextRead;
 		private bool escaping;
 		private bool didEscape;
 		private bool escapedEscapeChar;
@@ -91,18 +40,85 @@ namespace Beffyman.DsvParser
 		private string escapeCharAsString;
 		private int lastDelimiter;
 		private int index;
-		private ReadOnlyMemory<char> nextValue;
+		private ReadOnlyMemory<char> _nextValue;
+		private bool _lastReadIsLine;
 
+
+
+		/// <summary>
+		/// Converts the byte array into a string using the encoding and then provides the string into the constructor for strings
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="encoding"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(byte[] input, Encoding encoding, in DsvOptions options) : this(encoding.GetString(input), options) { }
+
+
+		/// <summary>
+		/// Calls <see cref="MemoryExtensions.AsMemory(string)"/> on the string and passes it into the appropriate constructor
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(string input, in DsvOptions options) : this(input.AsMemory(), options) { }
+
+
+		/// <summary>
+		/// Converts the Span into an array so it can be cast into a <see cref="ReadOnlyMemory{char}"/>
+		/// </summary>
+		/// <param name="dsv"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(in ReadOnlySpan<char> input, in DsvOptions options) : this(input.ToArray(), options) { }
+
+		/// <summary>
+		/// Creates a new <see cref="ReadOnlyMemory{char}"/> from the array and passes it into the appropriate constructor
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(char[] input, in DsvOptions options) : this(new ReadOnlyMemory<char>(input), options) { }
+
+		/// <summary>
+		/// Creates a reader that will step through the DSV file's values
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(in ReadOnlyMemory<char> input, in DsvOptions options)
+		{
+			Input = input;
+			_dsv = input.ToArray();
+			Options = options;
+
+			doubleEscapeChar = new string(new char[] { options.EscapeChar, options.EscapeChar });
+			escapeCharAsString = new string(new char[] { options.EscapeChar });
+
+			_delimiter = Options.Delimiter;
+			_hasHeaders = Options.HasHeaders;
+			_escapeChar = Options.EscapeChar;
+			_length = _dsv.Length;
+		}
+
+		/// <summary>
+		/// Move to the next value in the DSV
+		/// </summary>
+		/// <returns>Return false if there if nothing else can be read from the data</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool MoveNext()
 		{
 			return MoveToNext();
 		}
 
+		/// <summary>
+		/// Gets the next value in the file, requires calling MoveNext after to move to the next value
+		/// </summary>
+		/// <returns></returns>
 		public ReadOnlyMemory<char> ReadNext()
 		{
-			var r = nextValue;
-			nextValue = null;
+			var r = _nextValue;
+			_nextValue = null;
 			return r;
 		}
 
@@ -116,7 +132,7 @@ namespace Beffyman.DsvParser
 				int startRow = _rowCount;
 				do
 				{
-					arr[col++] = nextValue;
+					arr[col++] = _nextValue;
 				}
 				while (_rowCount == startRow && MoveNext());
 
@@ -139,7 +155,7 @@ namespace Beffyman.DsvParser
 						Array.Resize(ref arg, length);
 					}
 
-					arg[col++] = nextValue;
+					arg[col++] = _nextValue;
 				}
 				while (_rowCount == startRow && MoveNext());
 
@@ -167,7 +183,7 @@ namespace Beffyman.DsvParser
 
 			//Could probably get better performance with a switch, but would need constant delimiter
 
-			nextValue = null;
+			_nextValue = null;
 			//? GET RID OF PROPERTIES, THEY COST A LOT!!!
 			//var dsv = Input.Span;
 
@@ -184,7 +200,7 @@ namespace Beffyman.DsvParser
 
 			for (; index < _length; index++)
 			{
-				char indexValue = dsv[index];
+				char indexValue = _dsv[index];
 				//Check if we have a delimiter
 				if (indexValue == _delimiter)
 				{
@@ -199,21 +215,22 @@ namespace Beffyman.DsvParser
 						if (didEscape)
 						{
 							//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
-							nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2);
+							_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2);
 						}
 						else
 						{
-							nextValue = dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter);
+							_nextValue = _dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter);
 						}
 
 						if (didEscapeEscapeChar)
 						{
 							//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
-							nextValue = nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+							_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
 						}
 
 						lastDelimiter = index + 1;
 						didEscape = false;
+						_lastReadIsLine = false;
 
 						if (!_columnsFilled)
 						{
@@ -229,37 +246,38 @@ namespace Beffyman.DsvParser
 					//Finalize
 					if (escaping)
 					{
-						if (CheckLineFeed(dsv, index + 1))
+						if (CheckLineFeed(_dsv, index + 1))
 						{
 							//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
-							nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, (_length - lastDelimiter - 2) - 1);
+							_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, (_length - lastDelimiter - 2) - 1);
 						}
 						else
 						{
 							//Take 1 off both sides and 1 more as we are still escaping
-							nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, (_length - lastDelimiter) - 2);
+							_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, (_length - lastDelimiter) - 2);
 						}
 
 					}
-					else if (CheckLineFeed(dsv, index + 1))
+					else if (CheckLineFeed(_dsv, index + 1))
 					{
-						nextValue = dsv.AsMemory().Slice(lastDelimiter, _length - lastDelimiter - 2);
+						_nextValue = _dsv.AsMemory().Slice(lastDelimiter, _length - lastDelimiter - 2);
 					}
 					else
 					{
-						nextValue = dsv.AsMemory().Slice(lastDelimiter, _length - lastDelimiter);
+						_nextValue = _dsv.AsMemory().Slice(lastDelimiter, _length - lastDelimiter);
 					}
 
 					if (didEscapeEscapeChar)
 					{
 						//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
-						nextValue = nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+						_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
 					}
 
 					didEscape = false;
 					didEscapeEscapeChar = false;
 					_rowCount++;
 					_newRowNextRead = false;
+					_lastReadIsLine = false;
 
 					return true;
 				}
@@ -274,10 +292,10 @@ namespace Beffyman.DsvParser
 					//? Can probably get performance gains here by checking columns before checking line feed
 					//So this only gets hit if we have ",  and nothing like "", which would be in the middle of a cell, we need to make sure the quote is alone before the delimiter
 					else if ((index + 1) < _length
-								&& (dsv[index + 1] == _delimiter
-									|| CheckLineFeed(dsv, index + 3))
+								&& (_dsv[index + 1] == _delimiter
+									|| CheckLineFeed(_dsv, index + 3))
 						&& !escapedEscapeChar
-						&& dsv[index - 1] != _escapeChar)
+						&& _dsv[index - 1] != _escapeChar)
 					{
 						escaping = false;
 					}
@@ -300,33 +318,41 @@ namespace Beffyman.DsvParser
 
 					if (!escaping)
 					{
+						if (_lastReadIsLine && CheckLineFeed(_dsv, index + 1))
+						{
+							_lastReadIsLine = true;
+							lastDelimiter = index + 1;
+							didEscape = false;
+							didEscapeEscapeChar = false;
+						}
+
 						if (!_hasHeaders
 							|| (_columnsFilled
 									&& _column == _columnCount)
 								|| !_columnsFilled)
 						{
 							if ((index + 1) < _length
-								&& CheckLineFeed(dsv, index + 1))
+								&& CheckLineFeed(_dsv, index + 1))
 							{
 								if (escaping)
 								{
 									//This entry was escaped, that means we need to remove 1 from each side
-									nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+									_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
 								}
 								else if (didEscape)
 								{
-									nextValue = dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+									_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
 								}
 								else
 								{
-									nextValue = dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
+									_nextValue = _dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
 								}
 
 
 								if (didEscapeEscapeChar)
 								{
 									//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
-									nextValue = nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+									_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
 								}
 
 								//Check if we need to place the headers in
@@ -344,6 +370,7 @@ namespace Beffyman.DsvParser
 								//We treat the LineFeed as a delimiter as the last delimiter was before it
 								lastDelimiter = index + 1;
 								_newRowNextRead = true;
+								_lastReadIsLine = true;
 
 								return true;
 							}
@@ -380,5 +407,28 @@ namespace Beffyman.DsvParser
 			throw new FormatException("A row has more columns than the first line.");
 		}
 
+		public void Reset()
+		{
+			_rowCount = default;
+			_columnCount = default;
+			_column = default;
+			_columnsFilled = false;
+			_newRowNextRead = default;
+			escaping = default;
+			didEscape = default;
+			escapedEscapeChar = default;
+			didEscapeEscapeChar = default;
+			doubleEscapeChar = default;
+			escapeCharAsString = default;
+			lastDelimiter = default;
+			index = default;
+			_nextValue = default;
+			_lastReadIsLine = default;
+
+		}
+
+		public void Dispose()
+		{
+		}
 	}
 }
