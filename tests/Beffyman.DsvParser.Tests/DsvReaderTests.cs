@@ -312,6 +312,69 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 		[Fact]
+		public void MalformedData_Escapes()
+		{
+			string file = $"\"\"Column1\",Column2{Environment.NewLine}Data1,Data2";
+
+			Assert.Throws<FormatException>(() =>
+			{
+				var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+
+				List<ReadOnlyMemory<char>> columns = null;
+				List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
+
+
+				while (data.MoveNext())
+				{
+					if (!data.ColumnsFilled)
+					{
+						columns = data.ReadLine().ToList();
+					}
+					else
+					{
+						rows.Add(data.ReadLine().ToList());
+					}
+				}
+			});
+		}
+
+		[Fact]
+		public void DelimiterBetweenLines()
+		{
+			string file = $"Column1,Column2{Environment.NewLine},{Environment.NewLine}Data1,Data2";
+
+			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+
+			List<ReadOnlyMemory<char>> columns = null;
+			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
+
+
+			while (data.MoveNext())
+			{
+				if (!data.ColumnsFilled)
+				{
+					columns = data.ReadLine().ToList();
+				}
+				else
+				{
+					rows.Add(data.ReadLine().ToList());
+				}
+			}
+
+			Assert.Equal(2, columns.Count);
+			Assert.Equal(2, rows.Count);
+
+			Assert.Equal("Column1", columns[0].ToString());
+			Assert.Equal("Column2", columns[1].ToString());
+
+			Assert.Equal("", rows[0][0].ToString());
+			Assert.Equal("", rows[0][1].ToString());
+
+			Assert.Equal("Data1", rows[1][0].ToString());
+			Assert.Equal("Data2", rows[1][1].ToString());
+		}
+
+		[Fact]
 		public void DataHasLessColumnsThanHeader()
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2";
