@@ -13,5 +13,5 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- script: ./build.sh
+- bash: ./build.sh
   displayName: 'Nuke.Build $(buildConfiguration)'
