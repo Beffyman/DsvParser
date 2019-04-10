@@ -37,6 +37,7 @@ if (Test-Path $DotNetGlobalFile) {
     $DotNetGlobal = $(Get-Content $DotNetGlobalFile | Out-String | ConvertFrom-Json)
     if ($DotNetGlobal.PSObject.Properties["sdk"] -and $DotNetGlobal.sdk.PSObject.Properties["version"]) {
         $DotNetVersion = $DotNetGlobal.sdk.version
+		Write-Host "Loaded dotnet SDK version";
     }
 }
 
@@ -44,8 +45,10 @@ if (Test-Path $DotNetGlobalFile) {
 if ((Get-Command "dotnet" -ErrorAction SilentlyContinue) -ne $null -and `
      (!(Test-Path variable:DotNetVersion) -or $(& dotnet --version) -eq $DotNetVersion)) {
     $env:DOTNET_EXE = (Get-Command "dotnet").Path
+		Write-Host "SDK installed already";
 }
 else {
+	Write-Host "Installing sdk";
     $DotNetDirectory = "$TempDirectory\dotnet-win"
     $env:DOTNET_EXE = "$DotNetDirectory\dotnet.exe"
 
