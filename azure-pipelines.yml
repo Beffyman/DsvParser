@@ -31,10 +31,3 @@ steps:
     pathtoPublish: 'artifacts/nuget'
     artifactName: 'Nuget'
     displayName: 'Publish Artifacts'
-- task: NuGetCommand@2
-  inputs:
-    command: push
-    nuGetFeedType: external
-    publishFeedCredentials: 'Nuget-Beffyman'
-    versioningScheme: byEnvVar
-    versionEnvVar: version
