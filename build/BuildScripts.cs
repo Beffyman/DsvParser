@@ -53,7 +53,7 @@ public class BuildScripts : NukeBuild
 					.SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
 					.SetFileVersion(GitVersion.GetNormalizedFileVersion())
 					.SetInformationalVersion(GitVersion.InformationalVersion)
-					.SetOutputDirectory(ArtifactsDirectory));
+					.SetOutputDirectory(ArtifactsDirectory / "nuget"));
 		});
 
 	Target Test => _ => _
@@ -62,6 +62,17 @@ public class BuildScripts : NukeBuild
 		{
 			DotNetTest(s => s.EnableNoBuild()
 				.SetConfiguration(Configuration)
+				.EnableNoBuild()
+				.EnableNoRestore()
+				.SetLogger("trx")
+				.SetResultsDirectory(ArtifactsDirectory / "tests")
+				.SetLogOutput(true)
+				.SetArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", "true")
+					.Add("/p:CoverletOutput={0}/", ArtifactsDirectory / "tests")
+					.Add("/p:Threshold={0}", 80)
+					.Add("/p:Exclude=\"[xunit*]*\"")
+					.Add("/p:UseSourceLink={0}", "true")
+					.Add("/p:CoverletOutputFormat={0}", "cobertura"))
 				.SetProjectFile(Solution));
 		});
 

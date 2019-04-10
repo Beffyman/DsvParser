@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Beffyman.DsvParser
 {
-	public sealed class DsvReader : IEnumerator<ReadOnlyMemory<char>>
+	public sealed class DsvReader
 	{
 		public readonly DsvOptions Options;
 		public readonly ReadOnlyMemory<char> Input;
@@ -16,10 +16,6 @@ namespace Beffyman.DsvParser
 		public int Column => _column;
 		public bool ColumnsFilled => _columnsFilled;
 		public bool NewRowNextRead => _newRowNextRead;
-
-		public ReadOnlyMemory<char> Current => _nextValue;
-
-		object IEnumerator.Current => _nextValue;
 
 		private readonly char[] _dsv;
 		private readonly char _delimiter;
@@ -73,6 +69,14 @@ namespace Beffyman.DsvParser
 		public DsvReader(in ReadOnlySpan<char> input, in DsvOptions options) : this(input.ToArray(), options) { }
 
 		/// <summary>
+		/// Converts the Span into an array so it can be cast into a <see cref="ReadOnlyMemory{char}"/>
+		/// </summary>
+		/// <param name="dsv"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(in Span<char> input, in DsvOptions options) : this(input.ToArray(), options) { }
+
+		/// <summary>
 		/// Creates a new <see cref="ReadOnlyMemory{char}"/> from the array and passes it into the appropriate constructor
 		/// </summary>
 		/// <param name="input"></param>
@@ -92,8 +96,11 @@ namespace Beffyman.DsvParser
 			_dsv = input.ToArray();
 			Options = options;
 
-			doubleEscapeChar = new string(new char[] { options.EscapeChar, options.EscapeChar });
-			escapeCharAsString = new string(new char[] { options.EscapeChar });
+			ReadOnlySpan<char> dec = stackalloc char[] { options.EscapeChar, options.EscapeChar };
+			ReadOnlySpan<char> ecas = stackalloc char[] { options.EscapeChar };
+
+			doubleEscapeChar = dec.ToString();
+			escapeCharAsString = ecas.ToString();
 
 			_delimiter = Options.Delimiter;
 			_hasHeaders = Options.HasHeaders;
@@ -189,7 +196,7 @@ namespace Beffyman.DsvParser
 
 			if (_newRowNextRead)
 			{
-				_column = 1;
+				_column = 0;
 				_newRowNextRead = false;
 			}
 
@@ -206,11 +213,6 @@ namespace Beffyman.DsvParser
 				{
 					if (!escaping || (escaping && escapedEscapeChar))
 					{
-						if (_columnsFilled && _columnCount == _column)
-						{
-							ThrowInvalidRowColumn();
-						}
-
 						//If we do, then slice out the chars from until the last one we found.
 						if (didEscape)
 						{
@@ -237,6 +239,11 @@ namespace Beffyman.DsvParser
 							_columnCount++;
 						}
 						_column++;
+
+						if (_columnsFilled && _column > _columnCount)
+						{
+							ThrowInvalidRowColumn();
+						}
 
 						return true;
 					}
@@ -276,6 +283,7 @@ namespace Beffyman.DsvParser
 					didEscape = false;
 					didEscapeEscapeChar = false;
 					_rowCount++;
+					_column++;
 					_newRowNextRead = false;
 					_lastReadIsLine = false;
 
@@ -327,10 +335,14 @@ namespace Beffyman.DsvParser
 						}
 
 						if (!_hasHeaders
-							|| (_columnsFilled
-									&& _column == _columnCount)
-								|| !_columnsFilled)
+							|| (_columnsFilled && _column >= _columnCount - 1)
+							|| !_columnsFilled)
 						{
+							if (_column > _columnCount)
+							{
+								ThrowInvalidRowColumn();
+							}
+
 							if ((index + 1) < _length
 								&& CheckLineFeed(_dsv, index + 1))
 							{
@@ -361,6 +373,7 @@ namespace Beffyman.DsvParser
 									_columnCount++;
 									_columnsFilled = true;
 								}
+								_column++;
 
 								_rowCount++;
 
@@ -405,30 +418,6 @@ namespace Beffyman.DsvParser
 		private static void ThrowInvalidRowColumn()
 		{
 			throw new FormatException("A row has more columns than the first line.");
-		}
-
-		public void Reset()
-		{
-			_rowCount = default;
-			_columnCount = default;
-			_column = default;
-			_columnsFilled = false;
-			_newRowNextRead = default;
-			escaping = default;
-			didEscape = default;
-			escapedEscapeChar = default;
-			didEscapeEscapeChar = default;
-			doubleEscapeChar = default;
-			escapeCharAsString = default;
-			lastDelimiter = default;
-			index = default;
-			_nextValue = default;
-			_lastReadIsLine = default;
-
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }
