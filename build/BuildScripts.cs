@@ -7,11 +7,13 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Tools.ReportGenerator;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -37,6 +39,9 @@ public class BuildScripts : NukeBuild
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 	AbsolutePath TestsDirectory => RootDirectory / "tests";
 	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+	AbsolutePath TestArtifactsDirectory => ArtifactsDirectory / "tests";
+	AbsolutePath CodeCoverageReportOutput => TestArtifactsDirectory / "Reports";
+	AbsolutePath CodeCoverageFile => TestArtifactsDirectory / "coverage.cobertura.xml";
 
 	AbsolutePath PerformanceProject => TestsDirectory / "Beffyman.DsvParser.Performance";
 
@@ -65,15 +70,17 @@ public class BuildScripts : NukeBuild
 				.EnableNoBuild()
 				.EnableNoRestore()
 				.SetLogger("trx")
-				.SetResultsDirectory(ArtifactsDirectory / "tests")
+				.SetResultsDirectory(TestArtifactsDirectory)
 				.SetLogOutput(true)
 				.SetArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", "true")
-					.Add("/p:CoverletOutput={0}/", ArtifactsDirectory / "tests")
-					.Add("/p:Threshold={0}", 80)
-					.Add("/p:Exclude=\"[xunit*]*\"")
+					.Add("/p:CoverletOutput={0}/", TestArtifactsDirectory)
+					.Add("/p:Threshold={0}", 90)
+					.Add("/p:Exclude=\"[xunit*]*%2c[*.Tests]*\"")
 					.Add("/p:UseSourceLink={0}", "true")
 					.Add("/p:CoverletOutputFormat={0}", "cobertura"))
 				.SetProjectFile(Solution));
+
+			FileExists(CodeCoverageFile);
 		});
 
 	Target PerfTest => _ => _
@@ -111,6 +118,16 @@ public class BuildScripts : NukeBuild
 				.SetFileVersion(GitVersion.GetNormalizedFileVersion())
 				.SetInformationalVersion(GitVersion.InformationalVersion)
 				.EnableNoRestore());
+		});
+
+	Target Report => _ => _
+		.DependsOn(Pack)
+		.Executes(() =>
+		{
+			ReportGenerator(s => s.SetReports(CodeCoverageFile)
+								.SetTargetDirectory(CodeCoverageReportOutput)
+								.SetTag(GitVersion.NuGetVersionV2)
+								.SetReportTypes(ReportTypes.HtmlInline_AzurePipelines_Dark));
 		});
 
 }

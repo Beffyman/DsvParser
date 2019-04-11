@@ -23,7 +23,7 @@ steps:
   inputs:
     targetType: 'filePath'
     filePath: 'build.ps1'
-    arguments: '-configuration $(buildConfiguration) -target Pack'
+    arguments: '-configuration $(buildConfiguration) -target Report'
     failOnStderr: true
   displayName: 'Build'
 - task: PublishTestResults@2
@@ -36,6 +36,7 @@ steps:
   inputs:
     codeCoverageTool: cobertura
     summaryFileLocation: artifacts/tests/coverage.cobertura.xml
+    reportDirectory: artifacts/tests/Reports
     failIfCoverageEmpty: true
 - task: PublishBuildArtifacts@1
   inputs:
