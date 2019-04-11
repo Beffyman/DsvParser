@@ -32,6 +32,11 @@ steps:
    testResultsFiles: '*.trx'
    searchFolder: 'artifacts/tests'
   displayName: 'Publish Test results'
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: cobertura
+    summaryFileLocation: artifacts/tests/coverage.cobertura.xml
+    failIfCoverageEmpty: true
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: 'artifacts/nuget'
