@@ -13,6 +13,8 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- script: dotnet --info
+    displayName: Dump Info
 - task: PowerShell@2
   inputs:
     targetType: 'filePath'
