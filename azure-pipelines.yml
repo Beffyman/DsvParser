@@ -5,6 +5,10 @@
 
 trigger:
 - master
+- refs/tags/*
+
+pr:
+  autoCancel: true
 
 pool:
   vmImage: 'windows-2019'
@@ -43,3 +47,11 @@ steps:
     pathtoPublish: 'artifacts/nuget'
     artifactName: 'Nuget'
     displayName: 'Publish Artifacts'
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    feedsToUse: select
+    vstsFeed: Nuget-Beffyman
+    nuGetFeedType: internal
+    packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg
+  condition: contains(variables['Build.SourceBranch'], 'tags')
