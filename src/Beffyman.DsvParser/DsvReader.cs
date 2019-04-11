@@ -17,7 +17,6 @@ namespace Beffyman.DsvParser
 		public bool ColumnsFilled => _columnsFilled;
 		public bool NewRowNextRead => _newRowNextRead;
 
-		private readonly char[] _dsv;
 		private readonly char _delimiter;
 		private readonly char _escapeChar;
 		private readonly bool _hasHeaders;
@@ -39,6 +38,16 @@ namespace Beffyman.DsvParser
 		private ReadOnlyMemory<char> _nextValue;
 		private bool _lastReadIsLine;
 
+
+
+		/// <summary>
+		/// Converts the Memory of bytes into an array and passes that with it's encoding into the byte[] constructor
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="encoding"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(ReadOnlyMemory<byte> input, Encoding encoding, in DsvOptions options) : this(input.ToArray(), encoding, options) { }
 
 
 		/// <summary>
@@ -93,7 +102,6 @@ namespace Beffyman.DsvParser
 		public DsvReader(in ReadOnlyMemory<char> input, in DsvOptions options)
 		{
 			Input = input;
-			_dsv = input.ToArray();
 			Options = options;
 
 			ReadOnlySpan<char> dec = stackalloc char[] { options.EscapeChar, options.EscapeChar };
@@ -105,7 +113,7 @@ namespace Beffyman.DsvParser
 			_delimiter = Options.Delimiter;
 			_hasHeaders = Options.HasHeaders;
 			_escapeChar = Options.EscapeChar;
-			_length = _dsv.Length;
+			_length = Input.Length;
 		}
 
 		/// <summary>
@@ -192,7 +200,8 @@ namespace Beffyman.DsvParser
 
 			_nextValue = null;
 			//? GET RID OF PROPERTIES, THEY COST A LOT!!!
-			//var dsv = Input.Span;
+
+			var dsv = Input.Span;
 
 			if (_newRowNextRead)
 			{
@@ -207,7 +216,7 @@ namespace Beffyman.DsvParser
 
 			for (; index < _length; index++)
 			{
-				char indexValue = _dsv[index];
+				char indexValue = dsv[index];
 				//Check if we have a delimiter
 				if (indexValue == _delimiter)
 				{
@@ -217,11 +226,11 @@ namespace Beffyman.DsvParser
 						if (didEscape)
 						{
 							//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
-							_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2);
+							_nextValue = Input.Slice(lastDelimiter + 1, index - lastDelimiter - 2);
 						}
 						else
 						{
-							_nextValue = _dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter);
+							_nextValue = Input.Slice(lastDelimiter, index - lastDelimiter);
 						}
 
 						if (didEscapeEscapeChar)
@@ -253,25 +262,25 @@ namespace Beffyman.DsvParser
 					//Finalize
 					if (escaping)
 					{
-						if (CheckLineFeed(_dsv, index + 1))
+						if (CheckLineFeed(dsv, index + 1))
 						{
 							//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
-							_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, (_length - lastDelimiter - 2) - 1);
+							_nextValue = Input.Slice(lastDelimiter + 1, (_length - lastDelimiter - 2) - 1);
 						}
 						else
 						{
 							//Take 1 off both sides and 1 more as we are still escaping
-							_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, (_length - lastDelimiter) - 2);
+							_nextValue = Input.Slice(lastDelimiter + 1, (_length - lastDelimiter) - 2);
 						}
 
 					}
-					else if (CheckLineFeed(_dsv, index + 1))
+					else if (CheckLineFeed(dsv, index + 1))
 					{
-						_nextValue = _dsv.AsMemory().Slice(lastDelimiter, _length - lastDelimiter - 2);
+						_nextValue = Input.Slice(lastDelimiter, _length - lastDelimiter - 2);
 					}
 					else
 					{
-						_nextValue = _dsv.AsMemory().Slice(lastDelimiter, _length - lastDelimiter);
+						_nextValue = Input.Slice(lastDelimiter, _length - lastDelimiter);
 					}
 
 					if (didEscapeEscapeChar)
@@ -300,10 +309,10 @@ namespace Beffyman.DsvParser
 					//? Can probably get performance gains here by checking columns before checking line feed
 					//So this only gets hit if we have ",  and nothing like "", which would be in the middle of a cell, we need to make sure the quote is alone before the delimiter
 					else if ((index + 1) < _length
-								&& (_dsv[index + 1] == _delimiter
-									|| CheckLineFeed(_dsv, index + 3))
+								&& (dsv[index + 1] == _delimiter
+									|| CheckLineFeed(dsv, index + 3))
 						&& !escapedEscapeChar
-						&& _dsv[index - 1] != _escapeChar)
+						&& dsv[index - 1] != _escapeChar)
 					{
 						escaping = false;
 					}
@@ -326,7 +335,7 @@ namespace Beffyman.DsvParser
 
 					if (!escaping)
 					{
-						if (_lastReadIsLine && CheckLineFeed(_dsv, index + 1))
+						if (_lastReadIsLine && CheckLineFeed(dsv, index + 1))
 						{
 							_lastReadIsLine = true;
 							lastDelimiter = index + 1;
@@ -344,20 +353,20 @@ namespace Beffyman.DsvParser
 							}
 
 							if ((index + 1) < _length
-								&& CheckLineFeed(_dsv, index + 1))
+								&& CheckLineFeed(dsv, index + 1))
 							{
 								if (escaping)
 								{
 									//This entry was escaped, that means we need to remove 1 from each side
-									_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+									_nextValue = Input.Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
 								}
 								else if (didEscape)
 								{
-									_nextValue = _dsv.AsMemory().Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+									_nextValue = Input.Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
 								}
 								else
 								{
-									_nextValue = _dsv.AsMemory().Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
+									_nextValue = Input.Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
 								}
 
 

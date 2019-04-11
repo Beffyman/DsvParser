@@ -45,7 +45,7 @@ if (Test-Path $DotNetGlobalFile) {
 if ((Get-Command "dotnet" -ErrorAction SilentlyContinue) -ne $null -and `
      (!(Test-Path variable:DotNetVersion) -or $(& dotnet --version) -eq $DotNetVersion)) {
     $env:DOTNET_EXE = (Get-Command "dotnet").Path
-		Write-Host "SDK installed already";
+	Write-Host "SDK installed already";
 }
 else {
 	Write-Host "Installing sdk";
