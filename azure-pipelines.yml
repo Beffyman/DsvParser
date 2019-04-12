@@ -20,7 +20,7 @@ steps:
 - task: DotNetCoreInstaller@0
   inputs:
     packageType: sdk
-    version: 2.2.203
+    version: 3.0.100-preview3-010431
 - script: dotnet --info
   displayName: Dump Info
 - task: PowerShell@2
