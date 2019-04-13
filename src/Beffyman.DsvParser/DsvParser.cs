@@ -27,6 +27,7 @@ namespace Beffyman.DsvParser
 		/// <param name="dsv"></param>
 		/// <param name="encoding"></param>
 		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DsvParser(ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options) { }
 
@@ -37,6 +38,7 @@ namespace Beffyman.DsvParser
 		/// <param name="dsv"></param>
 		/// <param name="encoding"></param>
 		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DsvParser(byte[] dsv, Encoding encoding, in DsvOptions options) : this(encoding.GetString(dsv), options) { }
 
@@ -45,6 +47,7 @@ namespace Beffyman.DsvParser
 		/// </summary>
 		/// <param name="dsv"></param>
 		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DsvParser(char[] dsv, in DsvOptions options) : this(dsv.AsSpan(), options) { }
 
@@ -53,6 +56,7 @@ namespace Beffyman.DsvParser
 		/// </summary>
 		/// <param name="dsv"></param>
 		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DsvParser(string dsv, in DsvOptions options) : this(dsv.AsSpan(), options) { }
 
@@ -61,6 +65,7 @@ namespace Beffyman.DsvParser
 		/// </summary>
 		/// <param name="dsv"></param>
 		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DsvParser(in ReadOnlyMemory<char> dsv, in DsvOptions options) : this(dsv.Span, options) { }
 
@@ -69,6 +74,7 @@ namespace Beffyman.DsvParser
 		/// </summary>
 		/// <param name="dsv"></param>
 		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public DsvParser(in ReadOnlySpan<char> dsv, in DsvOptions options)
 		{

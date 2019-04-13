@@ -6,6 +6,9 @@ using System.Text;
 
 namespace Beffyman.DsvParser
 {
+	/// <summary>
+	/// Used to read through dsv data
+	/// </summary>
 	public sealed class DsvReader
 	{
 		public readonly DsvOptions Options;
@@ -119,6 +122,7 @@ namespace Beffyman.DsvParser
 		/// <summary>
 		/// Move to the next value in the DSV
 		/// </summary>
+		/// <exception cref="FormatException" />
 		/// <returns>Return false if there if nothing else can be read from the data</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool MoveNext()

@@ -18,6 +18,8 @@ Attempt at a high performance and memory efficient DSV parser that follows the [
 ### DsvOptions
 - Options object that allow custom DSV formats
 
+##### Type reader is planned
+
 ---
 ## Benchmark
 
