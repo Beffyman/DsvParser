@@ -23,6 +23,10 @@ steps:
     version: 3.0.100-preview3-010431
 - script: dotnet --info
   displayName: Dump Info
+- task: gittools.gitversion.gitversion-task.GitVersion@4
+  displayName: GitVersion
+  inputs:
+    preferBundledVersion: false
 - task: PowerShell@2
   inputs:
     targetType: 'filePath'
@@ -42,16 +46,38 @@ steps:
     summaryFileLocation: artifacts/tests/coverage.cobertura.xml
     reportDirectory: artifacts/tests/Reports
     failIfCoverageEmpty: true
+  displayName: 'Publish Code Coverage'
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: 'artifacts/nuget'
     artifactName: 'Nuget'
-    displayName: 'Publish Artifacts'
+  displayName: 'Publish Packages'
+- task: GitHubRelease@0
+  inputs:
+    gitHubConnection: Github-Beffyman
+    repositoryName: $(Build.Repository.Name)
+    action: create
+    target: $(Build.SourceVersion)
+    tagSource:manual
+    title: $(GitVersion.NuGetVersion)
+    assets: $(Build.ArtifactStagingDirectory)/**/*.nupkg
+  displayName: 'Create Github Release'
+  condition: contains(variables['Build.SourceBranch'], 'tags')
 - task: NuGetCommand@2
   inputs:
     command: push
     feedsToUse: select
     vstsFeed: Nuget-Beffyman
     nuGetFeedType: internal
-    packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg
+    packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg;
+  displayName: 'Push Nuget Packages'
+  condition: contains(variables['Build.SourceBranch'], 'tags')
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    feedsToUse: select
+    vstsFeed: Nuget-Beffyman
+    nuGetFeedType: internal
+    packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.snupkg;
+  displayName: 'Push Nuget Symbol Packages'
   condition: contains(variables['Build.SourceBranch'], 'tags')

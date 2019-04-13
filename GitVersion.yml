@@ -1,3 +1,1 @@
-assembly-versioning-scheme: MajorMinorPatch
-mode: ContinuousDelivery
-increment: Inherit
+mode: ContinuousDeployment
