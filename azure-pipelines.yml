@@ -31,7 +31,7 @@ steps:
   inputs:
     targetType: 'filePath'
     filePath: 'build.ps1'
-    arguments: '-configuration $(buildConfiguration) -target Report'
+    arguments: '-configuration $(buildConfiguration) -target CI'
     failOnStderr: true
   displayName: 'Build'
 - task: PublishTestResults@2

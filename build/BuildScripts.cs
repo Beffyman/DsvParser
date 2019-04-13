@@ -130,4 +130,9 @@ public class BuildScripts : NukeBuild
 								.SetReportTypes(ReportTypes.HtmlInline_AzurePipelines_Dark));
 		});
 
+
+	Target CI => _ => _
+		.DependsOn(Report)
+		.Executes(() => { });
+
 }
