@@ -20,7 +20,6 @@ namespace Beffyman.DsvParser.Performance
 		{
 			StringBuilder builder = new StringBuilder();
 			int x = 0;
-
 			for (int i = 0; i < columns; i++)
 			{
 				if (i != 0)
@@ -77,14 +76,14 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("MemoryFile")]
 		[Benchmark]
-		public DsvParser Beffyman_DsvParser_MemoryFile()
+		public DsvParser Beffyman_DsvParser()
 		{
 			return new DsvParser(MemoryFile, DsvOptions.DefaultCsvOptions);
 		}
 
 		[BenchmarkCategory("MemoryFile")]
 		[Benchmark(Baseline = true)]
-		public int Beffyman_DsvReader_MemoryFile()
+		public int Beffyman_DsvReader()
 		{
 			var reader = new DsvReader(MemoryFile, DsvOptions.DefaultCsvOptions);
 
@@ -124,7 +123,7 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("MemoryFile")]
 		[Benchmark]
-		public int DelimiterSeparatedTextParser_MemoryFile()
+		public int DelimiterSeparatedTextParser()
 		{
 			var totalLength = 0;
 			var parser = new DelimiterSeparatedTextParser.CsvParser(MemoryFile);
@@ -152,7 +151,7 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("StringFile")]
 		[Benchmark]
-		public int TinyCsvParser_StringFile()
+		public int TinyCsvParser()
 		{
 			var totalLength = 0;
 			if (Columns == 10)
@@ -329,7 +328,7 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("ByteArrayFile")]
 		[Benchmark]
-		public int FastCsvParser_ByteArrayFile()
+		public int FastCsvParser()
 		{
 			var totalLength = 0;
 
@@ -364,7 +363,7 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("StringFile")]
 		[Benchmark]
-		public int CsvHelper_StringFile()
+		public int CsvHelper()
 		{
 			var totalLength = 0;
 
@@ -392,7 +391,7 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("StringFile")]
 		[Benchmark]
-		public int FileHelpers_StringFile()
+		public int FileHelpers()
 		{
 			var totalLength = 0;
 			if (Columns == 10)

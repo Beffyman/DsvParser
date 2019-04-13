@@ -235,7 +235,8 @@ namespace Beffyman.DsvParser
 
 						if (didEscapeEscapeChar)
 						{
-							//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+							//Need to allocate something here, as we are no longer referring to a contiguous section of memory
+							//? USE string.create to get rid of the ToString().Replace() double allocations
 							_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
 						}
 
@@ -285,7 +286,8 @@ namespace Beffyman.DsvParser
 
 					if (didEscapeEscapeChar)
 					{
-						//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+						//Need to allocate something here, as we are no longer referring to a contiguous section of memory
+						//? USE string.create to get rid of the ToString().Replace() double allocations
 						_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
 					}
 
@@ -372,7 +374,8 @@ namespace Beffyman.DsvParser
 
 								if (didEscapeEscapeChar)
 								{
-									//Need to string.replace which will cause an allocation as we can't cut items out of the middle of a span
+									//Need to allocate something here, as we are no longer referring to a contiguous section of memory
+									//? USE string.create to get rid of the ToString().Replace() double allocations
 									_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
 								}
 
