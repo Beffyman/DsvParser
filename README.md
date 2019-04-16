@@ -15,14 +15,15 @@ Attempt at a high performance and memory efficient DSV parser that follows the [
 - Stores the columns (if they exist) and the rows in memory as ReadOnlyMemory\<char>s
 - Utilizes the DsvReader to read the file in lines with ReadLine
 
+### DsvParser\<TRecord, TRecordMapping>
+- Works the same way as the DsvParser, but when reading fields it will convert them into an instance of TRecord by using the TRecordMapping specified
+
 ### DsvOptions
 - Options object that allow custom DSV formats
 
-##### Type reader is planned
-
 ---
 ## Benchmark
-
+as of commit: e9b34430c226d3f47c2c8e7ffdaab0363471506a
 ``` ini
 
 BenchmarkDotNet=v0.11.5, OS=Windows 10.0.17763.437 (1809/October2018Update/Redstone5)

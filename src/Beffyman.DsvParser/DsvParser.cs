@@ -21,6 +21,17 @@ namespace Beffyman.DsvParser
 		public readonly ReadOnlyMemory<ReadOnlyMemory<ReadOnlyMemory<char>>> Rows;
 
 		/// <summary>
+		/// When you have a Span of bytes and a known encoding.
+		/// Least performant option as it needs to parse the bytes as a string via the encoding then convert the string that comes back from that as a Span
+		/// </summary>
+		/// <param name="dsv"></param>
+		/// <param name="encoding"></param>
+		/// <param name="options"></param>
+		/// <exception cref="FormatException" />
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvParser(ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options) { }
+
+		/// <summary>
 		/// When you have a Memory of bytes and a known encoding.
 		/// Least performant option as it needs to parse the bytes as a string via the encoding then convert the string that comes back from that as a Span
 		/// </summary>
