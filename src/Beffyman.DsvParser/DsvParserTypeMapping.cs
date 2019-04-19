@@ -11,24 +11,29 @@ namespace Beffyman.DsvParser
 	/// <typeparam name="T"></typeparam>
 	public abstract class DsvParserTypeMapping<T> where T : new()
 	{
-		private Dictionary<int, Action<T, ReadOnlyMemory<char>>> _mappings = new Dictionary<int, Action<T, ReadOnlyMemory<char>>>();
+		private Dictionary<int, DsvParserMapperDelegate<T>> _mappings = new Dictionary<int, DsvParserMapperDelegate<T>>();
 
-		public void MapProperty(int column, Action<T, ReadOnlyMemory<char>> setter)
+		public void MapProperty(int column, DsvParserMapperDelegate<T> setter)
 		{
 			_mappings.Add(column, setter);
 		}
 
-		public T Map(ReadOnlyMemory<char>[] row)
+		public void Map(ref T obj, int column, in ReadOnlySpan<char> data)
 		{
-			var element = new T();
-			for (int i = 0; i < row.Length; i++)
+			if (_mappings.ContainsKey(column))
 			{
-				if (_mappings.ContainsKey(i))
-				{
-					_mappings[i](element, row[i]);
-				}
+				_mappings[column](ref obj, data);
 			}
-			return element;
+
+			//var element = new T();
+			//for (int i = 0; i < row.Length; i++)
+			//{
+			//	if (_mappings.ContainsKey(i))
+			//	{
+			//		_mappings[i](element, row[i]);
+			//	}
+			//}
+			//return element;
 		}
 
 	}

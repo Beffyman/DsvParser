@@ -18,15 +18,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 		[Fact]
@@ -40,15 +40,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 		[Fact]
@@ -62,15 +62,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 		[Fact]
@@ -84,15 +84,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 		[Fact]
@@ -106,15 +106,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 		[Fact]
@@ -128,15 +128,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 
@@ -149,15 +149,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(3, data.Columns.Length);
-			Assert.Equal(1, data.Rows.Length);
+			Assert.Equal(1, data.Rows.Count);
 
 			Assert.Equal("Column1", data.Columns.Span[0].ToString());
 			Assert.Equal("Column2", data.Columns.Span[1].ToString());
 			Assert.Equal("Column3", data.Columns.Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[0].Span[2].ToString());
 		}
 
 
@@ -171,15 +171,15 @@ namespace Beffyman.DsvParser.Tests
 
 
 			Assert.Equal(0, data.Columns.Length);
-			Assert.Equal(2, data.Rows.Length);
+			Assert.Equal(2, data.Rows.Count);
 
-			Assert.Equal("Column1", data.Rows.Span[0].Span[0].ToString());
-			Assert.Equal("Column2", data.Rows.Span[0].Span[1].ToString());
-			Assert.Equal("Column3", data.Rows.Span[0].Span[2].ToString());
+			Assert.Equal("Column1", data.Rows[0].Span[0].ToString());
+			Assert.Equal("Column2", data.Rows[0].Span[1].ToString());
+			Assert.Equal("Column3", data.Rows[0].Span[2].ToString());
 
-			Assert.Equal("Data1", data.Rows.Span[1].Span[0].ToString());
-			Assert.Equal("Data2", data.Rows.Span[1].Span[1].ToString());
-			Assert.Equal("Data3", data.Rows.Span[1].Span[2].ToString());
+			Assert.Equal("Data1", data.Rows[1].Span[0].ToString());
+			Assert.Equal("Data2", data.Rows[1].Span[1].ToString());
+			Assert.Equal("Data3", data.Rows[1].Span[2].ToString());
 		}
 	}
 }

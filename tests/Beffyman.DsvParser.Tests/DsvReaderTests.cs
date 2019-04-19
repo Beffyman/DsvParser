@@ -202,7 +202,7 @@ namespace Beffyman.DsvParser.Tests
 
 			while (data.MoveNext())
 			{
-				values.Add(data.ReadNext());
+				values.Add(data.ReadNextAsMemory());
 			}
 
 			Assert.Equal(val, string.Join(",", values));
@@ -223,7 +223,7 @@ namespace Beffyman.DsvParser.Tests
 
 			while (data.MoveNext())
 			{
-				values.Add(data.ReadNext());
+				values.Add(data.ReadNextAsMemory());
 			}
 
 			Assert.Equal(span.ToArray(), values.Select(x => x.ToString()).ToArray());
@@ -317,9 +317,9 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.True(data.MoveNext());
 
-			var column1 = data.ReadNext().ToString();
+			var column1 = data.ReadNextAsMemory().ToString();
 			Assert.Equal("Column1", column1);
-			Assert.Empty(data.ReadNext().ToString());
+			Assert.Empty(data.ReadNextAsMemory().ToString());
 			Assert.Equal(1, data.Column);
 			Assert.Equal(1, data.ColumnCount);
 			Assert.Equal(0, data.RowCount);
@@ -328,9 +328,9 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.True(data.MoveNext());
 
-			var column2 = data.ReadNext().ToString();
+			var column2 = data.ReadNextAsMemory().ToString();
 			Assert.Equal("Column2", column2);
-			Assert.Empty(data.ReadNext().ToString());
+			Assert.Empty(data.ReadNextAsMemory().ToString());
 			Assert.Equal(2, data.Column);
 			Assert.Equal(2, data.ColumnCount);
 			Assert.Equal(0, data.RowCount);
@@ -339,9 +339,9 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.True(data.MoveNext());
 
-			var column3 = data.ReadNext().ToString();
+			var column3 = data.ReadNextAsMemory().ToString();
 			Assert.Equal("Column3", column3);
-			Assert.Empty(data.ReadNext().ToString());
+			Assert.Empty(data.ReadNextAsMemory().ToString());
 			Assert.Equal(3, data.Column);
 			Assert.Equal(3, data.ColumnCount);
 			Assert.Equal(1, data.RowCount);
@@ -350,9 +350,9 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.True(data.MoveNext());
 
-			var data1 = data.ReadNext().ToString();
+			var data1 = data.ReadNextAsMemory().ToString();
 			Assert.Equal("Data1", data1);
-			Assert.Empty(data.ReadNext().ToString());
+			Assert.Empty(data.ReadNextAsMemory().ToString());
 			Assert.Equal(1, data.Column);
 			Assert.Equal(3, data.ColumnCount);
 			Assert.Equal(1, data.RowCount);
@@ -361,9 +361,9 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.True(data.MoveNext());
 
-			var data2 = data.ReadNext().ToString();
+			var data2 = data.ReadNextAsMemory().ToString();
 			Assert.Equal("Data2", data2);
-			Assert.Empty(data.ReadNext().ToString());
+			Assert.Empty(data.ReadNextAsMemory().ToString());
 			Assert.Equal(2, data.Column);
 			Assert.Equal(3, data.ColumnCount);
 			Assert.Equal(1, data.RowCount);
@@ -372,9 +372,9 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.True(data.MoveNext());
 
-			var data3 = data.ReadNext().ToString();
+			var data3 = data.ReadNextAsMemory().ToString();
 			Assert.Equal("Data3", data3);
-			Assert.Empty(data.ReadNext().ToString());
+			Assert.Empty(data.ReadNextAsMemory().ToString());
 			Assert.Equal(3, data.Column);
 			Assert.Equal(3, data.ColumnCount);
 			Assert.Equal(2, data.RowCount);

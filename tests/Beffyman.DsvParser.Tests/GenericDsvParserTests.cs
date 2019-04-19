@@ -21,11 +21,11 @@ namespace Beffyman.DsvParser.Tests
 		{
 			public RecordMapping()
 			{
-				MapProperty(0, (r, data) => r.c0 = int.Parse(data.Span));
-				MapProperty(1, (r, data) => r.c1 = DateTime.Parse(data.Span));
-				MapProperty(2, (r, data) => r.c2 = data.ToString());
-				MapProperty(3, (r, data) => r.c3 = bool.Parse(data.Span));
-				MapProperty(4, (r, data) => r.c4 = TimeSpan.Parse(data.Span));
+				this.MapProperty(0, new DsvParserMapperDelegate<Record>((ref Record r, in ReadOnlySpan<char> data) => r.c0 = int.Parse(data)));
+				this.MapProperty(1, new DsvParserMapperDelegate<Record>((ref Record r, in ReadOnlySpan<char> data) => r.c1 = DateTime.Parse(data)));
+				this.MapProperty(2, new DsvParserMapperDelegate<Record>((ref Record r, in ReadOnlySpan<char> data) => r.c2 = data.ToString()));
+				this.MapProperty(3, new DsvParserMapperDelegate<Record>((ref Record r, in ReadOnlySpan<char> data) => r.c3 = bool.Parse(data)));
+				this.MapProperty(4, new DsvParserMapperDelegate<Record>((ref Record r, in ReadOnlySpan<char> data) => r.c4 = TimeSpan.Parse(data)));
 			}
 		}
 
@@ -166,9 +166,9 @@ namespace Beffyman.DsvParser.Tests
 
 			var parser = new DsvParser<Record, RecordMapping>(data, DsvOptions.DefaultCsvOptions);
 
-			Assert.Equal(1, parser.Rows.Length);
+			Assert.Equal(1, parser.Rows.Count);
 
-			var record = parser.Rows.Span[0];
+			var record = parser.Rows[0];
 
 			Assert.Equal(1, record.c0);
 			Assert.Equal(DateTime.Parse("1/1/2017"), record.c1);
@@ -184,9 +184,9 @@ namespace Beffyman.DsvParser.Tests
 
 			var parser = new DsvParser<Record, NoRecordMapping>(data, DsvOptions.DefaultCsvOptions);
 
-			Assert.Equal(1, parser.Rows.Length);
+			Assert.Equal(1, parser.Rows.Count);
 
-			var record = parser.Rows.Span[0];
+			var record = parser.Rows[0];
 
 			Assert.Equal(default, record.c0);
 			Assert.Equal(default, record.c1);

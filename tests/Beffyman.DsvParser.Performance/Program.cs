@@ -90,12 +90,102 @@ namespace Beffyman.DsvParser.Performance
 			int totalLength = 0;
 			while (reader.MoveNext())
 			{
-				var val = reader.ReadNext();
+				var val = reader.ReadNextAsSpan();
 				totalLength += val.Length;
 			}
 
 			return totalLength;
 		}
+
+		[BenchmarkCategory("MemoryFile")]
+		[Benchmark]
+		public void Beffyman_DsvParserGeneric()
+		{
+			if (Columns == 10)
+			{
+				var parser = new DsvParser<Record10, DsvRecordMapping10>(MemoryFile, DsvOptions.DefaultCsvOptions);
+			}
+			else
+			{
+				var parser = new DsvParser<Record50, DsvRecordMapping50>(MemoryFile, DsvOptions.DefaultCsvOptions);
+			}
+		}
+
+		private sealed class DsvRecordMapping10 : DsvParserTypeMapping<Record10>
+		{
+			public DsvRecordMapping10()
+			{
+				this.MapProperty(0, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column1 = data.ToString()));
+				this.MapProperty(1, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column2 = data.ToString()));
+				this.MapProperty(2, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column3 = data.ToString()));
+				this.MapProperty(3, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column4 = data.ToString()));
+				this.MapProperty(4, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column5 = data.ToString()));
+				this.MapProperty(5, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column6 = data.ToString()));
+				this.MapProperty(6, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column7 = data.ToString()));
+				this.MapProperty(7, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column8 = data.ToString()));
+				this.MapProperty(8, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column9 = data.ToString()));
+				this.MapProperty(9, new DsvParserMapperDelegate<Record10>((ref Record10 r, in ReadOnlySpan<char> data) => r.column10 = data.ToString()));
+			}
+		}
+
+
+		private sealed class DsvRecordMapping50 : DsvParserTypeMapping<Record50>
+		{
+			public DsvRecordMapping50()
+			{
+				this.MapProperty(0, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column1 = data.ToString()));
+				this.MapProperty(1, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column2 = data.ToString()));
+				this.MapProperty(2, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column3 = data.ToString()));
+				this.MapProperty(3, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column4 = data.ToString()));
+				this.MapProperty(4, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column5 = data.ToString()));
+				this.MapProperty(5, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column6 = data.ToString()));
+				this.MapProperty(6, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column7 = data.ToString()));
+				this.MapProperty(7, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column8 = data.ToString()));
+				this.MapProperty(8, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column9 = data.ToString()));
+				this.MapProperty(9, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column10 = data.ToString()));
+				this.MapProperty(10, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column11 = data.ToString()));
+				this.MapProperty(11, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column12 = data.ToString()));
+				this.MapProperty(12, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column13 = data.ToString()));
+				this.MapProperty(13, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column14 = data.ToString()));
+				this.MapProperty(14, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column15 = data.ToString()));
+				this.MapProperty(15, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column16 = data.ToString()));
+				this.MapProperty(16, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column17 = data.ToString()));
+				this.MapProperty(17, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column18 = data.ToString()));
+				this.MapProperty(18, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column19 = data.ToString()));
+				this.MapProperty(19, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column20 = data.ToString()));
+				this.MapProperty(20, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column21 = data.ToString()));
+				this.MapProperty(21, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column22 = data.ToString()));
+				this.MapProperty(22, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column23 = data.ToString()));
+				this.MapProperty(23, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column24 = data.ToString()));
+				this.MapProperty(24, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column25 = data.ToString()));
+				this.MapProperty(25, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column26 = data.ToString()));
+				this.MapProperty(26, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column27 = data.ToString()));
+				this.MapProperty(27, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column28 = data.ToString()));
+				this.MapProperty(28, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column29 = data.ToString()));
+				this.MapProperty(29, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column30 = data.ToString()));
+				this.MapProperty(30, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column31 = data.ToString()));
+				this.MapProperty(31, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column32 = data.ToString()));
+				this.MapProperty(32, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column33 = data.ToString()));
+				this.MapProperty(33, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column34 = data.ToString()));
+				this.MapProperty(34, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column35 = data.ToString()));
+				this.MapProperty(35, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column36 = data.ToString()));
+				this.MapProperty(36, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column37 = data.ToString()));
+				this.MapProperty(37, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column38 = data.ToString()));
+				this.MapProperty(38, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column39 = data.ToString()));
+				this.MapProperty(39, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column40 = data.ToString()));
+				this.MapProperty(40, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column41 = data.ToString()));
+				this.MapProperty(41, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column42 = data.ToString()));
+				this.MapProperty(42, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column43 = data.ToString()));
+				this.MapProperty(43, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column44 = data.ToString()));
+				this.MapProperty(44, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column45 = data.ToString()));
+				this.MapProperty(45, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column46 = data.ToString()));
+				this.MapProperty(46, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column47 = data.ToString()));
+				this.MapProperty(47, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column48 = data.ToString()));
+				this.MapProperty(48, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column49 = data.ToString()));
+				this.MapProperty(49, new DsvParserMapperDelegate<Record50>((ref Record50 r, in ReadOnlySpan<char> data) => r.column50 = data.ToString()));
+			}
+		}
+
 
 		#endregion Beffyman.DsvParser
 
@@ -150,7 +240,7 @@ namespace Beffyman.DsvParser.Performance
 		private string[] NewLine = new string[] { Environment.NewLine };
 
 		[BenchmarkCategory("StringFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int TinyCsvParser()
 		{
 			var totalLength = 0;
@@ -362,7 +452,7 @@ namespace Beffyman.DsvParser.Performance
 		#region CsvHelper
 
 		[BenchmarkCategory("StringFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int CsvHelper()
 		{
 			var totalLength = 0;
@@ -390,7 +480,7 @@ namespace Beffyman.DsvParser.Performance
 		#region FileHelpers
 
 		[BenchmarkCategory("StringFile")]
-		[Benchmark]
+		//[Benchmark]
 		public int FileHelpers()
 		{
 			var totalLength = 0;

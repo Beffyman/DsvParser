@@ -16,7 +16,7 @@ namespace Beffyman.DsvParser
 		/// <summary>
 		/// Rows that are contained within the parsed data
 		/// </summary>
-		public readonly ReadOnlyMemory<TRecord> Rows;
+		public readonly IReadOnlyList<TRecord> Rows;
 
 		/// <summary>
 		/// When you have a span of bytes and a known encoding
@@ -27,7 +27,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options, new TRecordMapping()) { }
+		public DsvParser(in ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options, new TRecordMapping()) { }
 
 		/// <summary>
 		/// When you have a span of bytes and a known encoding
@@ -39,7 +39,7 @@ namespace Beffyman.DsvParser
 		/// <param name="mapping"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options, TRecordMapping mapping) : this(dsv.ToArray(), encoding, options, mapping) { }
+		public DsvParser(in ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options, TRecordMapping mapping) : this(dsv.ToArray(), encoding, options, mapping) { }
 
 		/// <summary>
 		/// When you have a Memory of bytes and a known encoding.
@@ -50,7 +50,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options, new TRecordMapping()) { }
+		public DsvParser(in ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options, new TRecordMapping()) { }
 
 		/// <summary>
 		/// When you have a Memory of bytes and a known encoding.
@@ -62,7 +62,7 @@ namespace Beffyman.DsvParser
 		/// <param name="mapping"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options, TRecordMapping mapping) : this(dsv.ToArray(), encoding, options, mapping) { }
+		public DsvParser(in ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options, TRecordMapping mapping) : this(dsv.ToArray(), encoding, options, mapping) { }
 
 		/// <summary>
 		/// When you have a byte array and a known encoding.
@@ -165,22 +165,60 @@ namespace Beffyman.DsvParser
 		{
 			var reader = new DsvReader(dsv, options);
 
-			bool firstPass = options.HasHeaders;
+			//? This can be greatly improved upon performance wise
+			//? Use ReadNextAsSpan, manually check for next line/handle columns
+			//? This way we can use the Span<char> for the parsing
+
 			var rows = new List<TRecord>();
+
 			while (reader.MoveNext())
 			{
-				if (firstPass)
+				if (reader.ColumnsFilled)
 				{
-					Columns = reader.ReadLine();
-					firstPass = false;
+					TRecord record = new TRecord();
+
+					int col = 0;
+					int startRow = reader.RowCount;
+					do
+					{
+						mapping.Map(ref record, col++, reader.ReadNextAsSpan());
+					}
+					while (reader.RowCount == startRow && reader.MoveNext());
+
+					rows.Add(record);
 				}
 				else
 				{
-					rows.Add(mapping.Map(reader.ReadLine()));
+					//First pass, as we don't know how many columns there are, we need to have a resizable array as the collection
+					int length = 4;
+					ReadOnlyMemory<char>[] arg = new ReadOnlyMemory<char>[length];
+
+					int col = 0;
+					int startRow = reader.RowCount;
+					do
+					{
+						//If we need to resize, then double the size
+						if (col >= length)
+						{
+							length *= 2;
+							Array.Resize(ref arg, length);
+						}
+
+						arg[col++] = reader.ReadNextAsMemory();
+					}
+					while (reader.RowCount == startRow && reader.MoveNext());
+
+					//Resize back to correct length after we are done
+					if (length != col)
+					{
+						Array.Resize(ref arg, col);
+					}
+
+					Columns = arg;
 				}
 			}
 
-			Rows = rows.ToArray();
+			Rows = rows;
 		}
 	}
 }

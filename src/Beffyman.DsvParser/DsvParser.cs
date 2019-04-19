@@ -18,7 +18,7 @@ namespace Beffyman.DsvParser
 		/// <summary>
 		/// Rows that are contained within the parsed data
 		/// </summary>
-		public readonly ReadOnlyMemory<ReadOnlyMemory<ReadOnlyMemory<char>>> Rows;
+		public readonly IReadOnlyList<ReadOnlyMemory<ReadOnlyMemory<char>>> Rows;
 
 		/// <summary>
 		/// When you have a Span of bytes and a known encoding.
@@ -29,7 +29,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options) { }
+		public DsvParser(in ReadOnlySpan<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options) { }
 
 		/// <summary>
 		/// When you have a Memory of bytes and a known encoding.
@@ -40,7 +40,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options) { }
+		public DsvParser(in ReadOnlyMemory<byte> dsv, Encoding encoding, in DsvOptions options) : this(dsv.ToArray(), encoding, options) { }
 
 		/// <summary>
 		/// When you have a byte array and a known encoding.
@@ -106,7 +106,7 @@ namespace Beffyman.DsvParser
 				}
 			}
 
-			Rows = rows.ToArray();
+			Rows = rows;
 		}
 
 	}

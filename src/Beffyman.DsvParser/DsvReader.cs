@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -38,10 +36,25 @@ namespace Beffyman.DsvParser
 		private string escapeCharAsString;
 		private int lastDelimiter;
 		private int index;
-		private ReadOnlyMemory<char> _nextValue;
 		private bool _lastReadIsLine;
 
 
+
+
+		private int _reader_Start;
+		private int _reader_Length;
+		private bool _reader_Escaped;
+		private int _reader_NumberOfEscapedEscapeCharacters;
+
+
+		/// <summary>
+		/// Converts the Span of bytes into an array and passes that with it's encoding into the byte[] constructor
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="encoding"></param>
+		/// <param name="options"></param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public DsvReader(in ReadOnlySpan<byte> input, Encoding encoding, in DsvOptions options) : this(input.ToArray(), encoding, options) { }
 
 		/// <summary>
 		/// Converts the Memory of bytes into an array and passes that with it's encoding into the byte[] constructor
@@ -50,7 +63,7 @@ namespace Beffyman.DsvParser
 		/// <param name="encoding"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(ReadOnlyMemory<byte> input, Encoding encoding, in DsvOptions options) : this(input.ToArray(), encoding, options) { }
+		public DsvReader(in ReadOnlyMemory<byte> input, Encoding encoding, in DsvOptions options) : this(input.ToArray(), encoding, options) { }
 
 
 		/// <summary>
@@ -134,13 +147,105 @@ namespace Beffyman.DsvParser
 		/// Gets the next value in the file, requires calling MoveNext after to move to the next value
 		/// </summary>
 		/// <returns></returns>
-		public ReadOnlyMemory<char> ReadNext()
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ReadOnlySpan<char> ReadNextAsSpan()
 		{
-			var r = _nextValue;
-			_nextValue = null;
-			return r;
+			//? Input.Span, THIS PROPERTY CALL IS VERY EXPENSIVE, not sure if there is a way to get rid of it...
+
+			if (_reader_Length > 0)
+			{
+				ReadOnlySpan<char> span = default;
+				//If we do, then slice out the chars from until the last one we found.
+				if (_reader_Escaped)
+				{
+					if (_reader_NumberOfEscapedEscapeCharacters > 0)
+					{
+#if NETSTANDARD2_1 || NETCOREAPP2_1
+						int length = _reader_Length - _reader_NumberOfEscapedEscapeCharacters;
+						int start = _reader_Start;
+
+						//? With netstandard2.1/netcoreapp, we get access to string.Create which allows us to make only 1 allocation for a replace operation in the way we need it
+						span = string.Create(length, (this, _escapeChar, start, length), ReplaceEscapedChars).AsSpan();
+#else
+						//? Since we don't have access to string.Create, we need to allocate two new strings in order to perform the replace operation
+						span = Input.Span.Slice(_reader_Start, _reader_Length).ToString().Replace(doubleEscapeChar, escapeCharAsString).AsSpan();
+#endif
+					}
+					else
+					{
+						span = Input.Span.Slice(_reader_Start, _reader_Length);
+					}
+					//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
+				}
+				else
+				{
+					span = Input.Span.Slice(_reader_Start, _reader_Length);
+				}
+
+				ResetReader();
+
+				return span;
+			}
+			return default;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ReadOnlyMemory<char> ReadNextAsMemory()
+		{
+			//? Input.Span, THIS PROPERTY CALL IS VERY EXPENSIVE, not sure if there is a way to get rid of it...
+
+			if (_reader_Length > 0)
+			{
+				ReadOnlyMemory<char> memory = default;
+				//If we do, then slice out the chars from until the last one we found.
+				if (_reader_Escaped)
+				{
+					if (_reader_NumberOfEscapedEscapeCharacters > 0)
+					{
+#if NETSTANDARD2_1 || NETCOREAPP2_1
+						int length = _reader_Length - _reader_NumberOfEscapedEscapeCharacters;
+						int start = _reader_Start;
+
+						//? With netstandard2.1/netcoreapp, we get access to string.Create which allows us to make only 1 allocation for a replace operation in the way we need it
+						memory = string.Create(length, (this, _escapeChar, start, length), ReplaceEscapedChars).AsMemory();
+#else
+						//? Since we don't have access to string.Create, we need to allocate two new strings in order to perform the replace operation
+						memory = Input.Slice(_reader_Start, _reader_Length).ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+#endif
+					}
+					else
+					{
+						memory = Input.Slice(_reader_Start, _reader_Length);
+					}
+					//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
+				}
+				else
+				{
+					memory = Input.Slice(_reader_Start, _reader_Length);
+				}
+
+				ResetReader();
+
+				return memory;
+			}
+			return default;
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void ResetReader()
+		{
+			_reader_Start = 0;
+			_reader_Length = 0;
+			_reader_NumberOfEscapedEscapeCharacters = 0;
+			_reader_Escaped = false;
+		}
+
+		/// <summary>
+		/// Reads the next line of the DSV, but this allocates memory for the array and data inside it since it can't return a collection of Spans
+		/// </summary>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ReadOnlyMemory<char>[] ReadLine()
 		{
 			if (_columnsFilled)
@@ -151,7 +256,7 @@ namespace Beffyman.DsvParser
 				int startRow = _rowCount;
 				do
 				{
-					arr[col++] = _nextValue;
+					arr[col++] = ReadNextAsMemory();
 				}
 				while (_rowCount == startRow && MoveNext());
 
@@ -174,7 +279,7 @@ namespace Beffyman.DsvParser
 						Array.Resize(ref arg, length);
 					}
 
-					arg[col++] = _nextValue;
+					arg[col++] = ReadNextAsMemory();
 				}
 				while (_rowCount == startRow && MoveNext());
 
@@ -202,9 +307,9 @@ namespace Beffyman.DsvParser
 
 			//Could probably get better performance with a switch, but would need constant delimiter
 
-			_nextValue = null;
-			//? GET RID OF PROPERTIES, THEY COST A LOT!!!
+			ResetReader();
 
+			//? THIS PROPERTY CALL IS VERY EXPENSIVE, not sure if there is a way to get rid of it...
 			var dsv = Input.Span;
 
 			if (_newRowNextRead)
@@ -230,18 +335,18 @@ namespace Beffyman.DsvParser
 						if (didEscape)
 						{
 							//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
-							_nextValue = Input.Slice(lastDelimiter + 1, index - lastDelimiter - 2);
+							_reader_Start = lastDelimiter + 1;
+							_reader_Length = index - lastDelimiter - 2;
 						}
 						else
 						{
-							_nextValue = Input.Slice(lastDelimiter, index - lastDelimiter);
+							_reader_Start = lastDelimiter;
+							_reader_Length = index - lastDelimiter;
 						}
 
 						if (didEscapeEscapeChar)
 						{
-							//Need to allocate something here, as we are no longer referring to a contiguous section of memory
-							//? USE string.create to get rid of the ToString().Replace() double allocations
-							_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+							_reader_Escaped = true;
 						}
 
 						lastDelimiter = index + 1;
@@ -270,29 +375,31 @@ namespace Beffyman.DsvParser
 						if (CheckLineFeed(dsv, index + 1))
 						{
 							//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
-							_nextValue = Input.Slice(lastDelimiter + 1, (_length - lastDelimiter - 2) - 1);
+							_reader_Start = lastDelimiter + 1;
+							_reader_Length = (_length - lastDelimiter - 2) - 1;
 						}
 						else
 						{
 							//Take 1 off both sides and 1 more as we are still escaping
-							_nextValue = Input.Slice(lastDelimiter + 1, (_length - lastDelimiter) - 2);
+							_reader_Start = lastDelimiter + 1;
+							_reader_Length = _length - lastDelimiter - 2;
 						}
 
 					}
 					else if (CheckLineFeed(dsv, index + 1))
 					{
-						_nextValue = Input.Slice(lastDelimiter, _length - lastDelimiter - 2);
+						_reader_Start = lastDelimiter;
+						_reader_Length = _length - lastDelimiter - 2;
 					}
 					else
 					{
-						_nextValue = Input.Slice(lastDelimiter, _length - lastDelimiter);
+						_reader_Start = lastDelimiter;
+						_reader_Length = _length - lastDelimiter;
 					}
 
 					if (didEscapeEscapeChar)
 					{
-						//Need to allocate something here, as we are no longer referring to a contiguous section of memory
-						//? USE string.create to get rid of the ToString().Replace() double allocations
-						_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+						_reader_Escaped = true;
 					}
 
 					didEscape = false;
@@ -317,13 +424,13 @@ namespace Beffyman.DsvParser
 					else if ((index + 1) < _length
 								&& (dsv[index + 1] == _delimiter
 									|| CheckLineFeed(dsv, index + 3))
-						&& !escapedEscapeChar
-						&& dsv[index - 1] != _escapeChar)
+						&& !escapedEscapeChar)
 					{
 						escaping = false;
 					}
 					else if (!escapedEscapeChar)
 					{
+						_reader_NumberOfEscapedEscapeCharacters++;
 						escapedEscapeChar = true;
 						didEscapeEscapeChar = true;
 					}
@@ -364,23 +471,24 @@ namespace Beffyman.DsvParser
 								if (escaping)
 								{
 									//This entry was escaped, that means we need to remove 1 from each side
-									_nextValue = Input.Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+									_reader_Start = lastDelimiter + 1;
+									_reader_Length = index - lastDelimiter - 2 - 1;
 								}
 								else if (didEscape)
 								{
-									_nextValue = Input.Slice(lastDelimiter + 1, index - lastDelimiter - 2 - 1);
+									_reader_Start = lastDelimiter + 1;
+									_reader_Length = index - lastDelimiter - 2 - 1;
 								}
 								else
 								{
-									_nextValue = Input.Slice(lastDelimiter, index - lastDelimiter - 2 + 1);
+									_reader_Start = lastDelimiter;
+									_reader_Length = index - lastDelimiter - 2 + 1;
 								}
 
 
 								if (didEscapeEscapeChar)
 								{
-									//Need to allocate something here, as we are no longer referring to a contiguous section of memory
-									//? USE string.create to get rid of the ToString().Replace() double allocations
-									_nextValue = _nextValue.ToString().Replace(doubleEscapeChar, escapeCharAsString).AsMemory();
+									_reader_Escaped = true;
 								}
 
 								//Check if we need to place the headers in
@@ -410,6 +518,27 @@ namespace Beffyman.DsvParser
 
 			return false;
 		}
+
+#pragma warning disable EPS05
+		/// <summary>
+		/// Used to construct a string that has the escapee chars replaced
+		/// </summary>
+		/// <param name="chars"></param>
+		/// <param name="data"></param>
+		private static void ReplaceEscapedChars(Span<char> chars, (DsvReader reader, char escapeChar, int start, int length) data)
+		{
+			int offset = 0;
+			for (int i = 0; i < chars.Length; i++)
+			{
+				if (data.reader.Input.Span[data.start + i + offset] == data.escapeChar)
+				{
+					offset++;
+				}
+				chars[i] = data.reader.Input.Span[data.start + i + offset];
+			}
+		}
+
+#pragma warning restore EPS05
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool CheckLineFeed(in ReadOnlySpan<char> dsv, int i)
