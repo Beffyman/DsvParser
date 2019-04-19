@@ -240,7 +240,7 @@ namespace Beffyman.DsvParser.Performance
 		private string[] NewLine = new string[] { Environment.NewLine };
 
 		[BenchmarkCategory("StringFile")]
-		//[Benchmark]
+		[Benchmark]
 		public int TinyCsvParser()
 		{
 			var totalLength = 0;
@@ -452,7 +452,7 @@ namespace Beffyman.DsvParser.Performance
 		#region CsvHelper
 
 		[BenchmarkCategory("StringFile")]
-		//[Benchmark]
+		[Benchmark]
 		public int CsvHelper()
 		{
 			var totalLength = 0;
@@ -480,7 +480,7 @@ namespace Beffyman.DsvParser.Performance
 		#region FileHelpers
 
 		[BenchmarkCategory("StringFile")]
-		//[Benchmark]
+		[Benchmark]
 		public int FileHelpers()
 		{
 			var totalLength = 0;
