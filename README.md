@@ -23,7 +23,7 @@ Attempt at a high performance and memory efficient DSV parser that follows the [
 
 ---
 ## Benchmark
-as of commit: e9b34430c226d3f47c2c8e7ffdaab0363471506a
+as of commit: 6746888298bba9f6f282962d8acbd580d0667dc4
 ``` ini
 
 BenchmarkDotNet=v0.11.5, OS=Windows 10.0.17763.437 (1809/October2018Update/Redstone5)
