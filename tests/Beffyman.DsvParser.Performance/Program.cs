@@ -99,16 +99,14 @@ namespace Beffyman.DsvParser.Performance
 
 		[BenchmarkCategory("MemoryFile")]
 		[Benchmark(Baseline = true)]
-		public int Beffyman_DsvReader()
+		public void Beffyman_DsvReader()
 		{
 			var reader = new DsvReader(MemoryFile, DsvOptions.DefaultCsvOptions);
 
-			int totalLength = 0;
 			while (reader.MoveNext())
 			{
 			}
 
-			return totalLength;
 		}
 
 		[BenchmarkCategory("MemoryFile")]
