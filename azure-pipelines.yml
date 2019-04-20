@@ -52,32 +52,3 @@ steps:
     pathtoPublish: 'artifacts/nuget'
     artifactName: 'Nuget'
   displayName: 'Publish Packages'
-- task: GitHubRelease@0
-  inputs:
-    gitHubConnection: Github-Beffyman
-    repositoryName: $(Build.Repository.Name)
-    action: create
-    target: $(Build.SourceVersion)
-    tagSource: manual
-    title: $(GitVersion.NuGetVersion)
-    assets: $(Build.ArtifactStagingDirectory)/**/*.nupkg
-  displayName: 'Create Github Release'
-  condition: contains(variables['Build.SourceBranch'], 'tags')
-- task: NuGetCommand@2
-  inputs:
-    command: push
-    feedsToUse: select
-    vstsFeed: Nuget-Beffyman
-    nuGetFeedType: internal
-    packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg;
-  displayName: 'Push Nuget Packages'
-  condition: contains(variables['Build.SourceBranch'], 'tags')
-- task: NuGetCommand@2
-  inputs:
-    command: push
-    feedsToUse: select
-    vstsFeed: Nuget-Beffyman
-    nuGetFeedType: internal
-    packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.snupkg;
-  displayName: 'Push Nuget Symbol Packages'
-  condition: contains(variables['Build.SourceBranch'], 'tags')
