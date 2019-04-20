@@ -819,5 +819,27 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data2", rows[0][1].ToString());
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
+
+
+
+		[Fact]
+		public void ReadLine()
+		{
+			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2,Data3";
+
+			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			int rows = 0;
+
+			Assert.Equal(rows, data.RowCount);
+
+			while (data.MoveNextLine())
+			{
+				rows++;
+				Assert.Equal(rows, data.RowCount);
+			}
+
+
+			Assert.Equal(rows, data.RowCount);
+		}
 	}
 }

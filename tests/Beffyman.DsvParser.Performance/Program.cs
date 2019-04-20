@@ -82,8 +82,8 @@ namespace Beffyman.DsvParser.Performance
 		}
 
 		[BenchmarkCategory("MemoryFile")]
-		[Benchmark(Baseline = true)]
-		public int Beffyman_DsvReader()
+		[Benchmark()]
+		public int Beffyman_DsvReaderWithValue()
 		{
 			var reader = new DsvReader(MemoryFile, DsvOptions.DefaultCsvOptions);
 
@@ -92,6 +92,20 @@ namespace Beffyman.DsvParser.Performance
 			{
 				var val = reader.ReadNextAsSpan();
 				totalLength += val.Length;
+			}
+
+			return totalLength;
+		}
+
+		[BenchmarkCategory("MemoryFile")]
+		[Benchmark(Baseline = true)]
+		public int Beffyman_DsvReader()
+		{
+			var reader = new DsvReader(MemoryFile, DsvOptions.DefaultCsvOptions);
+
+			int totalLength = 0;
+			while (reader.MoveNext())
+			{
 			}
 
 			return totalLength;
@@ -225,6 +239,27 @@ namespace Beffyman.DsvParser.Performance
 				for (var valueNum = 0; valueNum < numValues; valueNum++)
 				{
 					var value = parser.GetValue(recordNum, valueNum);
+					totalLength += value.Length;
+				}
+			}
+
+			return totalLength;
+		}
+
+		[BenchmarkCategory("MemoryFile")]
+		[Benchmark]
+		public int DelimiterSeparatedTextParser_WithString()
+		{
+			var totalLength = 0;
+			var parser = new DelimiterSeparatedTextParser.CsvParser(MemoryFile);
+
+			var numRecords = parser.RecordsLength;
+			for (var recordNum = 0; recordNum < numRecords; recordNum++)
+			{
+				var numValues = parser.GetRecordLength(recordNum);
+				for (var valueNum = 0; valueNum < numValues; valueNum++)
+				{
+					var value = parser.GetValue(recordNum, valueNum).ToString();
 					totalLength += value.Length;
 				}
 			}

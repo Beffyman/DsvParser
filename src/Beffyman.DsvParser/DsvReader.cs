@@ -133,17 +133,6 @@ namespace Beffyman.DsvParser
 		}
 
 		/// <summary>
-		/// Move to the next value in the DSV
-		/// </summary>
-		/// <exception cref="FormatException" />
-		/// <returns>Return false if there if nothing else can be read from the data</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool MoveNext()
-		{
-			return MoveToNext();
-		}
-
-		/// <summary>
 		/// Gets the next value in the file, requires calling MoveNext after to move to the next value
 		/// </summary>
 		/// <returns></returns>
@@ -293,8 +282,30 @@ namespace Beffyman.DsvParser
 			}
 		}
 
+		/// <summary>
+		/// Move to the next line in the DSV
+		/// </summary>
+		/// <exception cref="FormatException" />
+		/// <returns>Return false if there if nothing else can be read from the data</returns>
+		public bool MoveNextLine()
+		{
+			bool canMove = true;
+			int row = _rowCount;
+			while (row == _rowCount && canMove)
+			{
+				canMove = MoveNext();
+			}
+
+			return canMove;
+		}
+
+		/// <summary>
+		/// Move to the next value in the DSV
+		/// </summary>
+		/// <exception cref="FormatException" />
+		/// <returns>Return false if there if nothing else can be read from the data</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool MoveToNext()
+		public bool MoveNext()
 		{
 			//Known limits
 			//Uses int for enumerating, so 2,147,483,647 bytes is the size limit
