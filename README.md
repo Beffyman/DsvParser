@@ -1,6 +1,7 @@
 # DsvParser
 [![Build Status](https://beffyman.visualstudio.com/Beffyman.Github/_apis/build/status/Beffyman.DsvParser?branchName=master)](https://beffyman.visualstudio.com/Beffyman.Github/_build/latest?definitionId=5&branchName=master)
 ![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/beffyman/Beffyman.Github/5.svg)
+![Nuget](https://img.shields.io/nuget/v/Beffyman.DsvParser.svg)
 
 Attempt at a high performance and memory efficient DSV parser that follows the [RFC4180](https://tools.ietf.org/html/rfc4180) spec
 
