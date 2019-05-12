@@ -10,7 +10,8 @@ trigger:
 pr:
   autoCancel: true
   branches:
-    include: master
+    include:
+      - master
 
 pool:
   vmImage: 'windows-2019'
