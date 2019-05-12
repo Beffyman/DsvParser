@@ -8,8 +8,9 @@ trigger:
 - refs/tags/*
 
 pr:
-- master
   autoCancel: true
+  branches:
+    include: master
 
 pool:
   vmImage: 'windows-2019'
