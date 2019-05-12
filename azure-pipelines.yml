@@ -12,6 +12,10 @@ pr:
   branches:
     include:
       - master
+  paths:
+    include:
+    - src/*
+    - tests/*
 
 pool:
   vmImage: 'windows-2019'
