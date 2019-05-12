@@ -8,6 +8,7 @@ trigger:
 - refs/tags/*
 
 pr:
+- master
   autoCancel: true
 
 pool:
