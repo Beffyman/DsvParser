@@ -13,7 +13,7 @@ BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
 TEMP_DIRECTORY="$SCRIPT_DIR//.tmp"
 
 DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
-DOTNET_INSTALL_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
+DOTNET_INSTALL_URL="https://dot.net/v1/dotnet-install.sh"
 DOTNET_CHANNEL="Current"
 
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -41,13 +41,13 @@ if [[ -x "$(command -v dotnet)" && (-z ${DOTNET_VERSION+x} || $(dotnet --version
 else
     DOTNET_DIRECTORY="$TEMP_DIRECTORY/dotnet-unix"
     export DOTNET_EXE="$DOTNET_DIRECTORY/dotnet"
-    
+
     # Download install script
     DOTNET_INSTALL_FILE="$TEMP_DIRECTORY/dotnet-install.sh"
     mkdir -p "$TEMP_DIRECTORY"
     curl -Lsfo "$DOTNET_INSTALL_FILE" "$DOTNET_INSTALL_URL"
     chmod +x "$DOTNET_INSTALL_FILE"
-    
+
     # Install by channel or version
     if [ -z ${DOTNET_VERSION+x} ]; then
         "$DOTNET_INSTALL_FILE" --install-dir "$DOTNET_DIRECTORY" --channel "$DOTNET_CHANNEL" --no-path
