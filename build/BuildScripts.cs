@@ -3,6 +3,7 @@ using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -55,8 +56,8 @@ public class BuildScripts : NukeBuild
 					.EnableIncludeSource()
 					.EnableIncludeSymbols()
 					.SetConfiguration(Configuration)
-					.SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
-					.SetFileVersion(GitVersion.GetNormalizedFileVersion())
+				.SetAssemblyVersion(GitVersion.AssemblySemVer)
+				.SetFileVersion(GitVersion.AssemblySemFileVer)
 					.SetInformationalVersion(GitVersion.InformationalVersion)
 					.SetOutputDirectory(ArtifactsDirectory / "nuget"));
 		});
@@ -114,8 +115,8 @@ public class BuildScripts : NukeBuild
 			DotNetBuild(s => s
 				.SetProjectFile(Solution)
 				.SetConfiguration(Configuration)
-				.SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
-				.SetFileVersion(GitVersion.GetNormalizedFileVersion())
+				.SetAssemblyVersion(GitVersion.AssemblySemVer)
+				.SetFileVersion(GitVersion.AssemblySemFileVer)
 				.SetInformationalVersion(GitVersion.InformationalVersion)
 				.EnableNoRestore());
 		});
