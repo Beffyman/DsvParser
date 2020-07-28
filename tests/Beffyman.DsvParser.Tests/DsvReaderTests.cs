@@ -600,6 +600,46 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("", rows[1][1].ToString());
 			Assert.Equal("", rows[1][2].ToString());
 		}
+
+		[Fact]
+		public void Escaped_LastValue()
+		{
+			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",\"HELLO\"{Environment.NewLine}";
+
+			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+
+			List<ReadOnlyMemory<char>> columns = null;
+			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
+
+
+			while (data.MoveNext())
+			{
+				if (!data.ColumnsFilled)
+				{
+					columns = data.ReadLine().ToList();
+				}
+				else
+				{
+					rows.Add(data.ReadLine().ToList());
+				}
+			}
+
+			Assert.Equal(3, columns.Count);
+			Assert.Equal(2, rows.Count);
+
+			Assert.Equal("Column1", columns[0].ToString());
+			Assert.Equal("Column2", columns[1].ToString());
+			Assert.Equal("Column3", columns[2].ToString());
+
+			Assert.Equal("", rows[0][0].ToString());
+			Assert.Equal("Data2", rows[0][1].ToString());
+			Assert.Equal("Data3", rows[0][2].ToString());
+
+			Assert.Equal("", rows[1][0].ToString());
+			Assert.Equal("", rows[1][1].ToString());
+			Assert.Equal("HELLO", rows[1][2].ToString());
+		}
+
 		[Fact]
 		public void EscapeBOM()
 		{

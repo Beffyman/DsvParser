@@ -400,8 +400,17 @@ namespace Beffyman.DsvParser
 					}
 					else if (CheckLineFeed(dsv, index + 1))
 					{
-						_reader_Start = lastDelimiter;
-						_reader_Length = _length - lastDelimiter - 2;
+						if (didEscape)
+						{
+							//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
+							_reader_Start = lastDelimiter + 1;
+							_reader_Length = (_length - lastDelimiter - 2) - 2;
+						}
+						else
+						{
+							_reader_Start = lastDelimiter;
+							_reader_Length = _length - lastDelimiter - 2;
+						}
 					}
 					else
 					{
