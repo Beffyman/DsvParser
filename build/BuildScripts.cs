@@ -128,6 +128,7 @@ public class BuildScripts : NukeBuild
 			ReportGenerator(s => s.SetReports(CodeCoverageFile)
 								.SetTargetDirectory(CodeCoverageReportOutput)
 								.SetTag(GitVersion.NuGetVersionV2)
+								.SetFramework("netcoreapp3.0")
 								.SetReportTypes(ReportTypes.HtmlInline_AzurePipelines_Dark));
 		});
 
