@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Memory" Version="4.5.2" Condition="'$(TargetFramework)'=='netstandard2.0'" />
+		<PackageReference Include="System.Memory" Version="4.5.4" Condition="'$(TargetFramework)'=='netstandard2.0'" />
 	</ItemGroup>
 
 </Project>

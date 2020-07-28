@@ -315,6 +315,7 @@ namespace Beffyman.DsvParser
 			//Escaped Quotes
 			//Escaped Delimiters
 			//Escaped LineFeed
+			//Skip BOM
 
 			//Could probably get better performance with a switch, but would need constant delimiter
 
@@ -449,6 +450,12 @@ namespace Beffyman.DsvParser
 					{
 						escapedEscapeChar = false;
 					}
+				}
+				//In the case that the string has a BOM, skip it
+				else if (indexValue == '\uFEFF')
+				{
+					_reader_Start++;
+					lastDelimiter = index + 1;
 				}
 				else
 				{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using BenchmarkDotNet.Attributes;
@@ -491,7 +492,7 @@ namespace Beffyman.DsvParser.Performance
 			var totalLength = 0;
 
 			using (var reader = new StringReader(StringFile))
-			using (var csv = new CsvHelper.CsvReader(reader))
+			using (var csv = new CsvHelper.CsvReader(reader, CultureInfo.CurrentCulture))
 			{
 				while (csv.Read())
 				{
