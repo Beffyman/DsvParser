@@ -143,6 +143,32 @@ namespace Beffyman.DsvParser
 
 			if (_reader_Length > 0)
 			{
+				//Skip whitespace at the start of a column unless it's inside quotes
+
+				var inputSpan = Input.Span;
+				var startSkip = 0;
+				for (int i = 0; i < _reader_Length; i++)
+				{
+					if (char.IsWhiteSpace(inputSpan[_reader_Start + i]))
+					{
+						startSkip++;
+					}
+					else
+					{
+						//When we hit our first non-whitespace, we skip
+						break;
+					}
+				}
+
+				_reader_Start += startSkip;
+				_reader_Length -= startSkip;
+
+				if (_reader_Length == 0)
+				{
+					ResetReader();
+					return ReadOnlySpan<char>.Empty;
+				}
+
 				ReadOnlySpan<char> span = default;
 				//If we do, then slice out the chars from until the last one we found.
 				if (_reader_Escaped)
@@ -157,18 +183,18 @@ namespace Beffyman.DsvParser
 						span = string.Create(length, (this, _escapeChar, start, length), ReplaceEscapedChars).AsSpan();
 #else
 						//? Since we don't have access to string.Create, we need to allocate two new strings in order to perform the replace operation
-						span = Input.Span.Slice(_reader_Start, _reader_Length).ToString().Replace(doubleEscapeChar, escapeCharAsString).AsSpan();
+						span = inputSpan.Slice(_reader_Start, _reader_Length).ToString().Replace(doubleEscapeChar, escapeCharAsString).AsSpan();
 #endif
 					}
 					else
 					{
-						span = Input.Span.Slice(_reader_Start, _reader_Length);
+						span = inputSpan.Slice(_reader_Start, _reader_Length);
 					}
 					//We know there was an escape char and a delimiter at the end, so take one off both sides for the escape, and 1 more from the end for the delimiter
 				}
 				else
 				{
-					span = Input.Span.Slice(_reader_Start, _reader_Length);
+					span = inputSpan.Slice(_reader_Start, _reader_Length);
 				}
 
 				ResetReader();
@@ -185,6 +211,33 @@ namespace Beffyman.DsvParser
 
 			if (_reader_Length > 0)
 			{
+
+				//Skip whitespace at the start of a column unless it's inside quotes
+
+				var inputSpan = Input.Span;
+				var startSkip = 0;
+				for (int i = 0; i < _reader_Length; i++)
+				{
+					if (char.IsWhiteSpace(inputSpan[_reader_Start + i]))
+					{
+						startSkip++;
+					}
+					else
+					{
+						//When we hit our first non-whitespace, we skip
+						break;
+					}
+				}
+
+				_reader_Start += startSkip;
+				_reader_Length -= startSkip;
+
+				if(_reader_Length == 0)
+				{
+					ResetReader();
+					return ReadOnlyMemory<char>.Empty;
+				}
+
 				ReadOnlyMemory<char> memory = default;
 				//If we do, then slice out the chars from until the last one we found.
 				if (_reader_Escaped)
