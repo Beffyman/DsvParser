@@ -15,6 +15,7 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+using Nuke.Common.CI.AzurePipelines;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -135,6 +136,9 @@ public class BuildScripts : NukeBuild
 
 	Target CI => _ => _
 		.DependsOn(Report)
-		.Executes(() => { });
+		.Executes(() =>
+		{
+			AzurePipelines.Instance?.UpdateBuildNumber(GitVersion.NuGetVersionV2);
+		});
 
 }
