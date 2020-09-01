@@ -48,10 +48,11 @@ namespace Beffyman.DsvParser.Tests
 		[Fact]
 		public void Constructor_ByteArray()
 		{
+			var encoding = System.Text.Encoding.UTF8;
 			string file = FileGenerator("Column", "Data", 1, 3);
-			var bytes = System.Text.Encoding.UTF8.GetBytes(file);
+			var bytes = encoding.GetBytes(file);
 
-			var data = new DsvReader(bytes, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(bytes, encoding, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -87,7 +88,7 @@ namespace Beffyman.DsvParser.Tests
 			string file = FileGenerator("Column", "Data", 1, 3);
 			var span = file.AsSpan();
 
-			var data = new DsvReader(span, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(span, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -123,7 +124,7 @@ namespace Beffyman.DsvParser.Tests
 			string file = FileGenerator("Column", "Data", 1, 3);
 			var array = file.ToCharArray();
 
-			var data = new DsvReader(array, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(array, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -158,7 +159,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = FileGenerator("Column", "Data", 1, 3);
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -195,7 +196,7 @@ namespace Beffyman.DsvParser.Tests
 			string val = "Data1,Data2,Data3";
 			Span<char> span = new Span<char>(val.ToCharArray());
 
-			var data = new DsvReader(span, new DsvOptions(',', '"', false));
+			var data = new DsvReader(span, System.Text.Encoding.UTF8, new DsvOptions(',', '"', false));
 
 			List<ReadOnlyMemory<char>> values = new List<ReadOnlyMemory<char>>();
 
@@ -216,7 +217,7 @@ namespace Beffyman.DsvParser.Tests
 
 			var file = string.Join(",", span.ToArray());
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> values = new List<ReadOnlyMemory<char>>();
 
@@ -235,7 +236,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = FileGenerator("Column", "Data", 10, 3);
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -273,7 +274,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = FileGenerator("Column", "Data", 3, 5);
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -313,7 +314,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = FileGenerator("Column", "Data", 1, 3);
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			Assert.True(data.MoveNext());
 
@@ -390,7 +391,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da,ta1\",\"Da,ta2\",\"Da,ta3\"";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -425,7 +426,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da{Environment.NewLine}ta1\",\"Da{Environment.NewLine}ta2\",\"Da{Environment.NewLine}ta3\"";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -461,7 +462,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"ta1\",\"Da\"\"ta2\",\"Da\"\"ta3\"";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -497,7 +498,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"\"Column\"\"1\",\"Column\"\"2\",\"Column\"\"3\"{Environment.NewLine}Data1,Data2,Data3";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -532,7 +533,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}Data1,Data2,Data3";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -567,7 +568,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -606,7 +607,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",\"HELLO\"{Environment.NewLine}";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -645,7 +646,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2, Column3{Environment.NewLine}Data1,Data2,Data3{Environment.NewLine}";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -675,13 +676,12 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void EscapeBOM()
+		private void EscapeBomWithEncoding(Encoding encoding, string bomPrefix = null)
 		{
-			char BOM = '\uFEFF';
+			var BOM = bomPrefix ?? encoding.GetString(encoding.GetPreamble());
 			string file = $"{BOM}\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, encoding, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -716,13 +716,27 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 		[Fact]
+		public void EscapeBOM()
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+			EscapeBomWithEncoding(new UTF8Encoding(true));
+			EscapeBomWithEncoding(new UTF8Encoding(false));
+			EscapeBomWithEncoding(new UTF32Encoding(true, true));
+			EscapeBomWithEncoding(new UTF32Encoding(true, false));
+			EscapeBomWithEncoding(new UTF32Encoding(false, false));
+			EscapeBomWithEncoding(new UTF32Encoding(false, true));
+			EscapeBomWithEncoding(Encoding.GetEncoding(1252));
+		}
+
+		[Fact]
 		public void MalformedHeader_SingleQuoteInMiddle()
 		{
 			string file = $"\"Col\"umn1\",Column2,Column3{Environment.NewLine},,";
 
 			Assert.Throws<FormatException>(() =>
 			{
-				var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+				var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 				List<ReadOnlyMemory<char>> columns = null;
 				List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -749,7 +763,7 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.Throws<FormatException>(() =>
 			{
-				var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+				var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 				List<ReadOnlyMemory<char>> columns = null;
 				List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -776,7 +790,7 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.Throws<FormatException>(() =>
 			{
-				var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+				var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 				List<ReadOnlyMemory<char>> columns = null;
 				List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -801,7 +815,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2{Environment.NewLine},{Environment.NewLine}Data1,Data2";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -837,7 +851,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -872,7 +886,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2{Environment.NewLine}{Environment.NewLine}Data1,Data2{Environment.NewLine}{Environment.NewLine}Data1,Data2";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -908,7 +922,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"\"\"ta1\",\"Data2\"\"\"\"\",\"\"\"\"\"Da\"\"ta3\"";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -943,7 +957,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,,Data3";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -978,7 +992,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2,Data3{Environment.NewLine}";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			List<ReadOnlyMemory<char>> columns = null;
 			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
@@ -1009,13 +1023,51 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 
+		[Fact]
+		public void SpecialCharacters()
+		{
+			string file = $"Column1,Column2,Column3{Environment.NewLine}Düsseldorf,Datüa2,ü123{Environment.NewLine}";
+
+			var bytes = Encoding.UTF8.GetBytes(file);
+
+			var data = new DsvReader(bytes, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
+
+			List<ReadOnlyMemory<char>> columns = null;
+			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
+
+
+			while (data.MoveNext())
+			{
+				if (!data.ColumnsFilled)
+				{
+					columns = data.ReadLine().ToList();
+				}
+				else
+				{
+					rows.Add(data.ReadLine().ToList());
+				}
+			}
+
+			Assert.Equal(3, columns.Count);
+			Assert.Single(rows);
+
+			Assert.Equal("Column1", columns[0].ToString());
+			Assert.Equal("Column2", columns[1].ToString());
+			Assert.Equal("Column3", columns[2].ToString());
+
+			Assert.Equal("Düsseldorf", rows[0][0].ToString());
+			Assert.Equal("Datüa2", rows[0][1].ToString());
+			Assert.Equal("ü123", rows[0][2].ToString());
+		}
+
+
 
 		[Fact]
 		public void ReadLine()
 		{
 			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2,Data3";
 
-			var data = new DsvReader(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 			int rows = 0;
 
 			Assert.Equal(rows, data.RowCount);

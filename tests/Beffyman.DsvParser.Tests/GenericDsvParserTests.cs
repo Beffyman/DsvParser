@@ -43,7 +43,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.AsMemory(), DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, RecordMapping>(data.AsMemory(),Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 		}
 
 
@@ -52,7 +52,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.AsMemory(), DsvOptions.DefaultCsvOptions, new RecordMapping());
+			var parser = new DsvParser<Record, RecordMapping>(data.AsMemory(), Encoding.UTF8, DsvOptions.DefaultCsvOptions, new RecordMapping());
 		}
 
 
@@ -79,7 +79,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.ToCharArray(), DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, RecordMapping>(data.ToCharArray(), Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 		}
 
 		[Fact]
@@ -87,7 +87,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.ToCharArray(), DsvOptions.DefaultCsvOptions, new RecordMapping());
+			var parser = new DsvParser<Record, RecordMapping>(data.ToCharArray(), Encoding.UTF8, DsvOptions.DefaultCsvOptions, new RecordMapping());
 		}
 
 		[Fact]
@@ -95,7 +95,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data, DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, RecordMapping>(data, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 		}
 
 		[Fact]
@@ -103,7 +103,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data, DsvOptions.DefaultCsvOptions, new RecordMapping());
+			var parser = new DsvParser<Record, RecordMapping>(data, Encoding.UTF8, DsvOptions.DefaultCsvOptions, new RecordMapping());
 		}
 
 		[Fact]
@@ -148,7 +148,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.AsSpan(), DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, RecordMapping>(data.AsSpan(), Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 		}
 
 		[Fact]
@@ -156,7 +156,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.AsSpan(), DsvOptions.DefaultCsvOptions, new RecordMapping());
+			var parser = new DsvParser<Record, RecordMapping>(data.AsSpan(), Encoding.UTF8, DsvOptions.DefaultCsvOptions, new RecordMapping());
 		}
 
 		[Fact]
@@ -164,7 +164,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data, DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, RecordMapping>(data, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			Assert.Equal(1, parser.Rows.Count);
 
@@ -182,7 +182,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, NoRecordMapping>(data, DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, NoRecordMapping>(data, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			Assert.Equal(1, parser.Rows.Count);
 

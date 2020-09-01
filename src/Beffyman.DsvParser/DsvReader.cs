@@ -11,6 +11,10 @@ namespace Beffyman.DsvParser
 	{
 		public readonly DsvOptions Options;
 		public readonly ReadOnlyMemory<char> Input;
+		public readonly Encoding Encoding;
+#if NETSTANDARD2_0
+		private char[] EncodingPreamble;
+#endif
 
 		public int RowCount => _rowCount;
 		public int ColumnCount => _columnCount;
@@ -73,7 +77,7 @@ namespace Beffyman.DsvParser
 		/// <param name="encoding"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(byte[] input, Encoding encoding, in DsvOptions options) : this(encoding.GetString(input), options) { }
+		public DsvReader(byte[] input, Encoding encoding, in DsvOptions options) : this(encoding.GetString(input), encoding, options) { }
 
 
 		/// <summary>
@@ -82,7 +86,7 @@ namespace Beffyman.DsvParser
 		/// <param name="input"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(string input, in DsvOptions options) : this(input.AsMemory(), options) { }
+		public DsvReader(string input, Encoding encoding, in DsvOptions options) : this(input.AsMemory(), encoding, options) { }
 
 
 		/// <summary>
@@ -91,7 +95,7 @@ namespace Beffyman.DsvParser
 		/// <param name="dsv"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(in ReadOnlySpan<char> input, in DsvOptions options) : this(input.ToArray(), options) { }
+		public DsvReader(in ReadOnlySpan<char> input, Encoding encoding, in DsvOptions options) : this(input.ToArray(), encoding, options) { }
 
 		/// <summary>
 		/// Converts the Span into an array so it can be cast into a <see cref="ReadOnlyMemory{char}"/>
@@ -99,7 +103,7 @@ namespace Beffyman.DsvParser
 		/// <param name="dsv"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(in Span<char> input, in DsvOptions options) : this(input.ToArray(), options) { }
+		public DsvReader(in Span<char> input, Encoding encoding, in DsvOptions options) : this(input.ToArray(), encoding, options) { }
 
 		/// <summary>
 		/// Creates a new <see cref="ReadOnlyMemory{char}"/> from the array and passes it into the appropriate constructor
@@ -107,7 +111,7 @@ namespace Beffyman.DsvParser
 		/// <param name="input"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(char[] input, in DsvOptions options) : this(new ReadOnlyMemory<char>(input), options) { }
+		public DsvReader(char[] input, Encoding encoding, in DsvOptions options) : this(new ReadOnlyMemory<char>(input), encoding, options) { }
 
 		/// <summary>
 		/// Creates a reader that will step through the DSV file's values
@@ -115,7 +119,7 @@ namespace Beffyman.DsvParser
 		/// <param name="input"></param>
 		/// <param name="options"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvReader(in ReadOnlyMemory<char> input, in DsvOptions options)
+		public DsvReader(in ReadOnlyMemory<char> input, Encoding encoding, in DsvOptions options)
 		{
 			Input = input;
 			Options = options;
@@ -130,6 +134,11 @@ namespace Beffyman.DsvParser
 			_hasHeaders = Options.HasHeaders;
 			_escapeChar = Options.EscapeChar;
 			_length = Input.Length;
+
+			Encoding = encoding;
+#if NETSTANDARD2_0
+			EncodingPreamble = Encoding.GetChars(encoding.GetPreamble());
+#endif
 		}
 
 		/// <summary>
@@ -232,7 +241,7 @@ namespace Beffyman.DsvParser
 				_reader_Start += startSkip;
 				_reader_Length -= startSkip;
 
-				if(_reader_Length == 0)
+				if (_reader_Length == 0)
 				{
 					ResetReader();
 					return ReadOnlyMemory<char>.Empty;
@@ -368,7 +377,7 @@ namespace Beffyman.DsvParser
 			//Escaped Quotes
 			//Escaped Delimiters
 			//Escaped LineFeed
-			//Skip BOM
+			//Skip BOM on any encoding
 
 			//Could probably get better performance with a switch, but would need constant delimiter
 
@@ -386,6 +395,30 @@ namespace Beffyman.DsvParser
 			if (index != 0)
 			{
 				index++;
+			}
+			else
+			{
+				if (Encoding != null)
+				{
+					//On first pass, skip over BOM value
+#if NETSTANDARD2_0
+					var encodingPreamble = EncodingPreamble;
+#else
+					var encodingPreamble = Encoding.GetChars(Encoding.Preamble.ToArray());
+#endif
+					int i = 0;
+					for (i = 0; i < encodingPreamble.Length; i++)
+					{
+						char indexValue = dsv[i];
+						char preambleValue = encodingPreamble[i];
+						if (indexValue != preambleValue)
+						{
+							break;
+						}
+					}
+					index += i;
+					lastDelimiter = index;
+				}
 			}
 
 			for (; index < _length; index++)
@@ -512,12 +545,6 @@ namespace Beffyman.DsvParser
 					{
 						escapedEscapeChar = false;
 					}
-				}
-				//In the case that the string has a BOM, skip it
-				else if (indexValue == '\uFEFF')
-				{
-					_reader_Start++;
-					lastDelimiter = index + 1;
 				}
 				else
 				{

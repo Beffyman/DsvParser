@@ -53,7 +53,7 @@ namespace Beffyman.DsvParser.Profiler
 			Stopwatch timer = new Stopwatch();
 			timer.Start();
 
-			var parser = new DsvParser(file.AsSpan(), DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser(file.AsSpan(), Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			timer.Stop();
 			Console.WriteLine(nameof(DsvParser));
@@ -66,7 +66,7 @@ namespace Beffyman.DsvParser.Profiler
 			timer.Restart();
 
 
-			var genericParser = new DsvParser<Record100, DsvRecordMapping100>(file.AsSpan(), DsvOptions.DefaultCsvOptions);
+			var genericParser = new DsvParser<Record100, DsvRecordMapping100>(file.AsSpan(), Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			timer.Stop();
 			Console.WriteLine($"{nameof(DsvParser)}<{nameof(Record100)}, {nameof(DsvRecordMapping100)}> ");

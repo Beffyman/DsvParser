@@ -51,7 +51,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(byte[] dsv, Encoding encoding, in DsvOptions options) : this(encoding.GetString(dsv), options) { }
+		public DsvParser(byte[] dsv, Encoding encoding, in DsvOptions options) : this(encoding.GetString(dsv), encoding, options) { }
 
 		/// <summary>
 		/// Converts the char array into a span and then parses it
@@ -60,7 +60,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(char[] dsv, in DsvOptions options) : this(dsv.AsSpan(), options) { }
+		public DsvParser(char[] dsv, Encoding encoding, in DsvOptions options) : this(dsv.AsSpan(), encoding, options) { }
 
 		/// <summary>
 		/// Converts the string into a span and then parses it
@@ -69,7 +69,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(string dsv, in DsvOptions options) : this(dsv.AsSpan(), options) { }
+		public DsvParser(string dsv, Encoding encoding, in DsvOptions options) : this(dsv.AsSpan(), encoding, options) { }
 
 		/// <summary>
 		/// Converts the <see cref="ReadOnlyMemory{T}"/> into a <see cref="ReadOnlySpan{T}"/> and uses that to parse the data
@@ -78,7 +78,7 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(in ReadOnlyMemory<char> dsv, in DsvOptions options) : this(dsv.Span, options) { }
+		public DsvParser(in ReadOnlyMemory<char> dsv, Encoding encoding, in DsvOptions options) : this(dsv.Span, encoding, options) { }
 
 		/// <summary>
 		/// Directly uses the Span provided to parse the data, most performant option
@@ -87,9 +87,9 @@ namespace Beffyman.DsvParser
 		/// <param name="options"></param>
 		/// <exception cref="FormatException" />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public DsvParser(in ReadOnlySpan<char> dsv, in DsvOptions options)
+		public DsvParser(in ReadOnlySpan<char> dsv, Encoding encoding, in DsvOptions options)
 		{
-			var reader = new DsvReader(dsv, options);
+			var reader = new DsvReader(dsv, encoding, options);
 
 			bool firstPass = options.HasHeaders;
 			var rows = new List<ReadOnlyMemory<ReadOnlyMemory<char>>>();

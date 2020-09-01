@@ -79,14 +79,14 @@ namespace Beffyman.DsvParser.Performance
 		[Benchmark]
 		public DsvParser Beffyman_DsvParser()
 		{
-			return new DsvParser(MemoryFile, DsvOptions.DefaultCsvOptions);
+			return new DsvParser(MemoryFile, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 		}
 
 		[BenchmarkCategory("MemoryFile")]
 		[Benchmark()]
 		public int Beffyman_DsvReaderWithValue()
 		{
-			var reader = new DsvReader(MemoryFile, DsvOptions.DefaultCsvOptions);
+			var reader = new DsvReader(MemoryFile, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			int totalLength = 0;
 			while (reader.MoveNext())
@@ -102,7 +102,7 @@ namespace Beffyman.DsvParser.Performance
 		[Benchmark(Baseline = true)]
 		public void Beffyman_DsvReader()
 		{
-			var reader = new DsvReader(MemoryFile, DsvOptions.DefaultCsvOptions);
+			var reader = new DsvReader(MemoryFile, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 			while (reader.MoveNext())
 			{
@@ -116,11 +116,11 @@ namespace Beffyman.DsvParser.Performance
 		{
 			if (Columns == 10)
 			{
-				var parser = new DsvParser<Record10, DsvRecordMapping10>(MemoryFile, DsvOptions.DefaultCsvOptions);
+				var parser = new DsvParser<Record10, DsvRecordMapping10>(MemoryFile, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 			}
 			else
 			{
-				var parser = new DsvParser<Record50, DsvRecordMapping50>(MemoryFile, DsvOptions.DefaultCsvOptions);
+				var parser = new DsvParser<Record50, DsvRecordMapping50>(MemoryFile, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 			}
 		}
 

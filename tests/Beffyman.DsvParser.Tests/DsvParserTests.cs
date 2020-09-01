@@ -80,7 +80,7 @@ namespace Beffyman.DsvParser.Tests
 			var array = file.ToCharArray();
 
 
-			var data = new DsvParser(array, DsvOptions.DefaultCsvOptions);
+			var data = new DsvParser(array, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 
 			Assert.Equal(3, data.Columns.Length);
@@ -102,7 +102,7 @@ namespace Beffyman.DsvParser.Tests
 			var mem = file.AsMemory();
 
 
-			var data = new DsvParser(mem, DsvOptions.DefaultCsvOptions);
+			var data = new DsvParser(mem, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 
 			Assert.Equal(3, data.Columns.Length);
@@ -124,7 +124,7 @@ namespace Beffyman.DsvParser.Tests
 			var span = file.AsSpan();
 
 
-			var data = new DsvParser(span, DsvOptions.DefaultCsvOptions);
+			var data = new DsvParser(span, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 
 			Assert.Equal(3, data.Columns.Length);
@@ -145,7 +145,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = FileGenerator("Column", "Data", 1, 3);
 
-			var data = new DsvParser(file, DsvOptions.DefaultCsvOptions);
+			var data = new DsvParser(file, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
 
 			Assert.Equal(3, data.Columns.Length);
@@ -167,7 +167,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string file = FileGenerator("Column", "Data", 1, 3);
 
-			var data = new DsvParser(file, new DsvOptions(',', '"', false));
+			var data = new DsvParser(file, Encoding.UTF8, new DsvOptions(',', '"', false));
 
 
 			Assert.Equal(0, data.Columns.Length);
