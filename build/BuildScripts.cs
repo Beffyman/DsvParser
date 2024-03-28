@@ -20,14 +20,6 @@ using Nuke.Common.CI.AzurePipelines;
 [UnsetVisualStudioEnvironmentVariables]
 public class BuildScripts : NukeBuild
 {
-	/*
-	/// Support plugins are available for:
-	///   - JetBrains ReSharper        https://nuke.build/resharper
-	///   - JetBrains Rider            https://nuke.build/rider
-	///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-	///   - Microsoft VSCode           https://nuke.build/vscode
-	*/
-
 	public static int Main() => Execute<BuildScripts>(x => x.Pack);
 
 	[Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
@@ -39,7 +31,8 @@ public class BuildScripts : NukeBuild
 
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 	AbsolutePath TestsDirectory => RootDirectory / "tests";
-	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+	//Put output into artifact dir on azdo agent
+	AbsolutePath ArtifactsDirectory => (AbsolutePath)Nuke.Common.EnvironmentInfo.GetVariable<string>("Build_ArtifactStagingDirectory") ?? RootDirectory / "artifacts";
 	AbsolutePath TestArtifactsDirectory => ArtifactsDirectory / "tests";
 	AbsolutePath CodeCoverageReportOutput => TestArtifactsDirectory / "Reports";
 	AbsolutePath CodeCoverageFile => TestArtifactsDirectory / "coverage.cobertura.xml";
