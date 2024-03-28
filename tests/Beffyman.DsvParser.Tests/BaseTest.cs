@@ -6,7 +6,7 @@ namespace Beffyman.DsvParser.Tests
 {
 	public abstract class BaseTest
 	{
-		protected string FileGenerator(string headerPrefix, string dataPrefix, int rows, int columns)
+		protected string FileGenerator(string headerPrefix, string dataPrefix, string lineBreak, int rows, int columns)
 		{
 			StringBuilder builder = new StringBuilder();
 			int x = 0;
@@ -20,7 +20,7 @@ namespace Beffyman.DsvParser.Tests
 				builder.Append($"{headerPrefix}{++x}");
 			}
 
-			builder.AppendLine();
+			builder.Append(lineBreak);
 
 			for (int i = 0; i < rows; i++)
 			{
@@ -33,7 +33,7 @@ namespace Beffyman.DsvParser.Tests
 					}
 					builder.Append($"{dataPrefix}{++z}");
 				}
-				builder.AppendLine();
+				builder.Append(lineBreak);
 			}
 
 			return builder.ToString();

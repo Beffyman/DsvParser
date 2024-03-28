@@ -17,18 +17,9 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using Nuke.Common.CI.AzurePipelines;
 
-[CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 public class BuildScripts : NukeBuild
 {
-	/*
-	/// Support plugins are available for:
-	///   - JetBrains ReSharper        https://nuke.build/resharper
-	///   - JetBrains Rider            https://nuke.build/rider
-	///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-	///   - Microsoft VSCode           https://nuke.build/vscode
-	*/
-
 	public static int Main() => Execute<BuildScripts>(x => x.Pack);
 
 	[Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
@@ -40,7 +31,8 @@ public class BuildScripts : NukeBuild
 
 	AbsolutePath SourceDirectory => RootDirectory / "src";
 	AbsolutePath TestsDirectory => RootDirectory / "tests";
-	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+	//Put output into artifact dir on azdo agent
+	AbsolutePath ArtifactsDirectory => (AbsolutePath)Nuke.Common.EnvironmentInfo.GetVariable<string>("Build_ArtifactStagingDirectory") ?? RootDirectory / "artifacts";
 	AbsolutePath TestArtifactsDirectory => ArtifactsDirectory / "tests";
 	AbsolutePath CodeCoverageReportOutput => TestArtifactsDirectory / "Reports";
 	AbsolutePath CodeCoverageFile => TestArtifactsDirectory / "coverage.cobertura.xml";
@@ -71,18 +63,16 @@ public class BuildScripts : NukeBuild
 				.SetConfiguration(Configuration)
 				.EnableNoBuild()
 				.EnableNoRestore()
-				.SetLogger("trx")
+				.SetLoggers("trx")
 				.SetResultsDirectory(TestArtifactsDirectory)
-				.SetLogOutput(true)
-				.SetArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", "true")
+				.SetProcessLogOutput(true)
+				.SetProcessArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", "true")
 					.Add("/p:CoverletOutput={0}/", TestArtifactsDirectory)
 					.Add("/p:Threshold={0}", 90)
 					.Add("/p:Exclude=\"[xunit*]*%2c[*.Tests]*\"")
 					.Add("/p:UseSourceLink={0}", "true")
 					.Add("/p:CoverletOutputFormat={0}", "cobertura"))
 				.SetProjectFile(Solution));
-
-			FileExists(CodeCoverageFile);
 		});
 
 	Target PerfTest => _ => _
@@ -90,7 +80,7 @@ public class BuildScripts : NukeBuild
 		.Executes(() =>
 		{
 			DotNetRun(s => s.SetConfiguration(Configuration.Release)
-				.SetWorkingDirectory(PerformanceProject));
+				.SetProcessWorkingDirectory(PerformanceProject));
 		});
 
 	Target Restore => _ => _
@@ -103,9 +93,9 @@ public class BuildScripts : NukeBuild
 	Target Clean => _ => _
 		.Executes(() =>
 		{
-			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			EnsureCleanDirectory(ArtifactsDirectory);
+			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+			ArtifactsDirectory.CreateOrCleanDirectory();
 		});
 
 	Target Build => _ => _
@@ -129,7 +119,7 @@ public class BuildScripts : NukeBuild
 			ReportGenerator(s => s.SetReports(CodeCoverageFile)
 								.SetTargetDirectory(CodeCoverageReportOutput)
 								.SetTag(GitVersion.NuGetVersionV2)
-								.SetFramework("netcoreapp3.0")
+								.SetFramework("net8.0")
 								.SetReportTypes(ReportTypes.HtmlInline_AzurePipelines_Dark));
 		});
 

@@ -184,7 +184,7 @@ namespace Beffyman.DsvParser
 				{
 					if (_reader_NumberOfEscapedEscapeCharacters > 0)
 					{
-#if NETSTANDARD2_1 || NETCOREAPP2_1
+#if NETSTANDARD2_1
 						int length = _reader_Length - _reader_NumberOfEscapedEscapeCharacters;
 						int start = _reader_Start;
 
@@ -253,7 +253,7 @@ namespace Beffyman.DsvParser
 				{
 					if (_reader_NumberOfEscapedEscapeCharacters > 0)
 					{
-#if NETSTANDARD2_1 || NETCOREAPP2_1
+#if NETSTANDARD2_1
 						int length = _reader_Length - _reader_NumberOfEscapedEscapeCharacters;
 						int start = _reader_Start;
 
@@ -376,7 +376,7 @@ namespace Beffyman.DsvParser
 			//Quotes
 			//Escaped Quotes
 			//Escaped Delimiters
-			//Escaped LineFeed
+			//Escaped LineFeed, Carriage Returns
 			//Skip BOM on any encoding
 
 			//Could probably get better performance with a switch, but would need constant delimiter
@@ -393,6 +393,11 @@ namespace Beffyman.DsvParser
 			}
 
 			if (index != 0)
+			{
+				index++;
+			}
+			//Case where we have a start comma, would just loop endlessly on index=0
+			else if (index == 0 && _column != 0)
 			{
 				index++;
 			}
@@ -467,35 +472,37 @@ namespace Beffyman.DsvParser
 				}
 				else if (index == _length - 1)
 				{
+					var newline = CheckLineFeed(dsv, index + 1);
 					//Finalize
 					if (escaping)
 					{
-						if (CheckLineFeed(dsv, index + 1))
+						switch (newline)
 						{
-							//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
-							_reader_Start = lastDelimiter + 1;
-							_reader_Length = (_length - lastDelimiter - 2) - 1;
+							case NewLineType.LineFeed:
+							case NewLineType.CarriageReturn:
+								//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
+								_reader_Start = lastDelimiter + 1;
+								_reader_Length = (_length - lastDelimiter - GetNewLineLength(newline)) - 1;
+								break;
+							case NewLineType.None:
+								//Take 1 off both sides and 1 more as we are still escaping
+								_reader_Start = lastDelimiter + 1;
+								_reader_Length = _length - lastDelimiter - 2;
+								break;
 						}
-						else
-						{
-							//Take 1 off both sides and 1 more as we are still escaping
-							_reader_Start = lastDelimiter + 1;
-							_reader_Length = _length - lastDelimiter - 2;
-						}
-
 					}
-					else if (CheckLineFeed(dsv, index + 1))
+					else if (newline != NewLineType.None)
 					{
 						if (didEscape)
 						{
 							//This entry was escaped, that means we need to remove 1 from each side, but also take off the line feed from the end of the file
 							_reader_Start = lastDelimiter + 1;
-							_reader_Length = (_length - lastDelimiter - 2) - 2;
+							_reader_Length = (_length - lastDelimiter - GetNewLineLength(newline)) - 2;
 						}
 						else
 						{
 							_reader_Start = lastDelimiter;
-							_reader_Length = _length - lastDelimiter - 2;
+							_reader_Length = _length - lastDelimiter - GetNewLineLength(newline);
 						}
 					}
 					else
@@ -520,6 +527,7 @@ namespace Beffyman.DsvParser
 				}
 				else if (indexValue == _escapeChar)
 				{
+					var newline = CheckLineFeed_ForwardLook(dsv, index);
 					//Need to figure out if we are already escaping, if not, then escape
 					if (!escaping)
 					{
@@ -530,7 +538,7 @@ namespace Beffyman.DsvParser
 					//So this only gets hit if we have ",  and nothing like "", which would be in the middle of a cell, we need to make sure the quote is alone before the delimiter
 					else if ((index + 1) < _length
 								&& (dsv[index + 1] == _delimiter
-									|| CheckLineFeed(dsv, index + 3))
+									|| newline != NewLineType.None)
 						&& !escapedEscapeChar)
 					{
 						escaping = false;
@@ -555,7 +563,8 @@ namespace Beffyman.DsvParser
 
 					if (!escaping)
 					{
-						if (_lastReadIsLine && CheckLineFeed(dsv, index + 1))
+						var newline = CheckLineFeed(dsv, index + 1);
+						if (_lastReadIsLine && newline != NewLineType.None)
 						{
 							_lastReadIsLine = true;
 							lastDelimiter = index + 1;
@@ -573,23 +582,23 @@ namespace Beffyman.DsvParser
 							}
 
 							if ((index + 1) < _length
-								&& CheckLineFeed(dsv, index + 1))
+								&& newline != NewLineType.None)
 							{
 								if (escaping)
 								{
 									//This entry was escaped, that means we need to remove 1 from each side
 									_reader_Start = lastDelimiter + 1;
-									_reader_Length = index - lastDelimiter - 2 - 1;
+									_reader_Length = index - lastDelimiter - GetNewLineLength(newline) - 1;
 								}
 								else if (didEscape)
 								{
 									_reader_Start = lastDelimiter + 1;
-									_reader_Length = index - lastDelimiter - 2 - 1;
+									_reader_Length = index - lastDelimiter - GetNewLineLength(newline) - 1;
 								}
 								else
 								{
 									_reader_Start = lastDelimiter;
-									_reader_Length = index - lastDelimiter - 2 + 1;
+									_reader_Length = index - lastDelimiter - GetNewLineLength(newline) + 1;
 								}
 
 
@@ -646,19 +655,89 @@ namespace Beffyman.DsvParser
 		}
 
 #pragma warning restore EPS05
-
+		/// <summary>
+		/// Backwards check for newline, this is called after the newline is processed
+		/// </summary>
+		/// <param name="dsv"></param>
+		/// <param name="i"></param>
+		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool CheckLineFeed(in ReadOnlySpan<char> dsv, int i)
+		private NewLineType CheckLineFeed(in ReadOnlySpan<char> dsv, int i)
 		{
 			if (i >= 2)
 			{
-				return ((dsv[i - 2] == '\r' || dsv[i - 2] == '\n')
-					&& (dsv[i - 1] == '\r' || dsv[i - 1] == '\n'));
+				//Check for \r\n
+				if (dsv[i - 1] == '\n')
+				{
+					if (dsv[i - 2] == '\r')
+					{
+						return NewLineType.CarriageReturn;
+					}
+					else
+					{
+						return NewLineType.LineFeed;
+					}
+				}
+			}
+			else if (i >= 1)
+			{
+				//Only do \n check since not enough chars passed
+				if (dsv[i - 1] == '\n')
+				{
+					return NewLineType.LineFeed;
+				}
 			}
 
-			return false;
+			return NewLineType.None;
 		}
 
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private NewLineType CheckLineFeed_ForwardLook(in ReadOnlySpan<char> dsv, int i)
+		{
+			if (i + 2 < dsv.Length)
+			{
+				//Check for \r\n
+				if (dsv[i + 1] == '\n')
+				{
+					return NewLineType.LineFeed;
+				}
+				else if (dsv[i + 1] == '\r'
+					&& dsv[i + 2] == '\n')
+				{
+					return NewLineType.CarriageReturn;
+				}
+			}
+			else if (i + 1 < dsv.Length)
+			{
+				//Only do \n check since not enough chars in string left
+				if (dsv[i + 1] == '\n')
+				{
+					return NewLineType.LineFeed;
+				}
+			}
+
+			return NewLineType.None;
+		}
+
+		/// <summary>
+		/// Gets the length of the newline characters used \r\n or \n
+		/// </summary>
+		/// <param name="newline"></param>
+		/// <returns></returns>
+		private int GetNewLineLength(NewLineType newline)
+		{
+			switch (newline)
+			{
+				case NewLineType.CarriageReturn:
+					return 2;
+				case NewLineType.LineFeed:
+					return 1;
+				case NewLineType.None:
+				default:
+					return 0;
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ThrowInvalidEscapedEscapeChar()

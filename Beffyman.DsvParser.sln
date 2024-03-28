@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28714.193
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Beffyman.DsvParser", "src\Beffyman.DsvParser\Beffyman.DsvParser.csproj", "{A0F6E439-400A-4DA4-B838-3715A24C7597}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Beffyman.DsvParser.Tests", "tests\Beffyman.DsvParser.Tests\Beffyman.DsvParser.Tests.csproj", "{88772536-0F5E-4DAC-9078-59DE5D8BD7AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{7E3917F7-6C5E-45AA-9D25-5E7D6348EC76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7492C782-51AE-4C98-9361-EDAA1FBA9FAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,7 @@ Global
 		{62F0A247-B876-4C75-83A9-A6D7DB73A062} = {A1EC2659-565E-46F1-A279-08900BC386F6}
 		{8E640E68-8AD2-4BD9-8247-DA351C7AA8B3} = {A1EC2659-565E-46F1-A279-08900BC386F6}
 		{88772536-0F5E-4DAC-9078-59DE5D8BD7AA} = {A1EC2659-565E-46F1-A279-08900BC386F6}
+		{7E3917F7-6C5E-45AA-9D25-5E7D6348EC76} = {7492C782-51AE-4C98-9361-EDAA1FBA9FAE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BD64A537-6D97-4C04-92D0-B532561C4DAD}

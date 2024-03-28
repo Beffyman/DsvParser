@@ -9,10 +9,12 @@ namespace Beffyman.DsvParser.Tests
 	public class DsvReaderTests : BaseTest
 	{
 
-		[Fact]
-		public void Constructor_MemoryBytes()
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Constructor_MemoryBytes(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 1, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 1, 3);
 			var bytes = System.Text.Encoding.UTF8.GetBytes(file).AsMemory();
 
 			var data = new DsvReader(bytes, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
@@ -45,11 +47,14 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void Constructor_ByteArray()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Constructor_ByteArray(string lineBreak)
 		{
 			var encoding = System.Text.Encoding.UTF8;
-			string file = FileGenerator("Column", "Data", 1, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 1, 3);
 			var bytes = encoding.GetBytes(file);
 
 			var data = new DsvReader(bytes, encoding, DsvOptions.DefaultCsvOptions);
@@ -82,10 +87,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void Constructor_ReadOnlySpan()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Constructor_ReadOnlySpan(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 1, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 1, 3);
 			var span = file.AsSpan();
 
 			var data = new DsvReader(span, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
@@ -118,10 +126,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void Constructor_CharArray()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Constructor_CharArray(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 1, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 1, 3);
 			var array = file.ToCharArray();
 
 			var data = new DsvReader(array, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
@@ -154,10 +165,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void Constructor_String()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Constructor_String(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 1, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 1, 3);
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -190,6 +204,7 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 
+
 		[Fact]
 		public void Constructor_Span()
 		{
@@ -208,6 +223,7 @@ namespace Beffyman.DsvParser.Tests
 
 			Assert.Equal(val, string.Join(",", values));
 		}
+
 
 		[Fact]
 		public void ReadNextSequential()
@@ -231,10 +247,13 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 
-		[Fact]
-		public void SimpleData_MultipleDataRows()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void SimpleData_MultipleDataRows(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 10, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 10, 3);
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -269,10 +288,13 @@ namespace Beffyman.DsvParser.Tests
 			}
 		}
 
-		[Fact]
-		public void ColumnResize()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void ColumnResize(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 3, 5);
+			string file = FileGenerator("Column", "Data", lineBreak, 3, 5);
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -309,10 +331,13 @@ namespace Beffyman.DsvParser.Tests
 			}
 		}
 
-		[Fact]
-		public void PublicPropertyState()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void PublicPropertyState(string lineBreak)
 		{
-			string file = FileGenerator("Column", "Data", 1, 3);
+			string file = FileGenerator("Column", "Data", lineBreak, 1, 3);
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -386,10 +411,13 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 
-		[Fact]
-		public void EscapedDelimiter()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EscapedDelimiter(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da,ta1\",\"Da,ta2\",\"Da,ta3\"";
+			string file = $"Column1,Column2,Column3{lineBreak}\"Da,ta1\",\"Da,ta2\",\"Da,ta3\"";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -421,10 +449,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Da,ta3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void EscapedLineFeed()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EscapedLineFeed(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da{Environment.NewLine}ta1\",\"Da{Environment.NewLine}ta2\",\"Da{Environment.NewLine}ta3\"";
+			string file = $"Column1,Column2,Column3{lineBreak}\"Da{lineBreak}ta1\",\"Da{lineBreak}ta2\",\"Da{lineBreak}ta3\"";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -451,16 +482,19 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Column2", columns[1].ToString());
 			Assert.Equal("Column3", columns[2].ToString());
 
-			Assert.Equal($"Da{Environment.NewLine}ta1", rows[0][0].ToString());
-			Assert.Equal($"Da{Environment.NewLine}ta2", rows[0][1].ToString());
-			Assert.Equal($"Da{Environment.NewLine}ta3", rows[0][2].ToString());
+			Assert.Equal($"Da{lineBreak}ta1", rows[0][0].ToString());
+			Assert.Equal($"Da{lineBreak}ta2", rows[0][1].ToString());
+			Assert.Equal($"Da{lineBreak}ta3", rows[0][2].ToString());
 		}
 
 
-		[Fact]
-		public void EscapedEscape_Data()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EscapedEscape_Data(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"ta1\",\"Da\"\"ta2\",\"Da\"\"ta3\"";
+			string file = $"Column1,Column2,Column3{lineBreak}\"Da\"\"ta1\",\"Da\"\"ta2\",\"Da\"\"ta3\"";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -493,10 +527,13 @@ namespace Beffyman.DsvParser.Tests
 		}
 
 
-		[Fact]
-		public void EscapedEscape_Columns()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EscapedEscape_Columns(string lineBreak)
 		{
-			string file = $"\"Column\"\"1\",\"Column\"\"2\",\"Column\"\"3\"{Environment.NewLine}Data1,Data2,Data3";
+			string file = $"\"Column\"\"1\",\"Column\"\"2\",\"Column\"\"3\"{lineBreak}Data1,Data2,Data3";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -528,10 +565,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void Escaped_Columns()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Escaped_Columns(string lineBreak)
 		{
-			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}Data1,Data2,Data3";
+			string file = $"\"Column1\",\"Column2\",\"Column3\"{lineBreak}Data1,Data2,Data3";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -563,10 +603,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void Escaped_EmptyData()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Escaped_EmptyData(string lineBreak)
 		{
-			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",";
+			string file = $"\"Column1\",\"Column2\",\"Column3\"{lineBreak}\"\",Data2,Data3{lineBreak},\"\",";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -602,10 +645,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("", rows[1][2].ToString());
 		}
 
-		[Fact]
-		public void Escaped_LastValue()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void Escaped_LastValue(string lineBreak)
 		{
-			string file = $"\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",\"HELLO\"{Environment.NewLine}";
+			string file = $"\"Column1\",\"Column2\",\"Column3\"{lineBreak}\"\",Data2,Data3{lineBreak},\"\",\"HELLO\"{lineBreak}";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -641,10 +687,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("HELLO", rows[1][2].ToString());
 		}
 
-		[Fact]
-		public void HeaderWithWhitespace()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void HeaderWithWhitespace(string lineBreak)
 		{
-			string file = $"Column1,Column2, Column3{Environment.NewLine}Data1,Data2,Data3{Environment.NewLine}";
+			string file = $"Column1,Column2, Column3{lineBreak}Data1,Data2,Data3{lineBreak}";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -676,10 +725,10 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		private void EscapeBomWithEncoding(Encoding encoding, string bomPrefix = null)
+		private void EscapeBomWithEncoding(Encoding encoding, string lineBreak, string bomPrefix = null)
 		{
 			var BOM = bomPrefix ?? encoding.GetString(encoding.GetPreamble());
-			string file = $"{BOM}\"Column1\",\"Column2\",\"Column3\"{Environment.NewLine}\"\",Data2,Data3{Environment.NewLine},\"\",";
+			string file = $"{BOM}\"Column1\",\"Column2\",\"Column3\"{lineBreak}\"\",Data2,Data3{lineBreak},\"\",";
 
 			var data = new DsvReader(file, encoding, DsvOptions.DefaultCsvOptions);
 
@@ -715,24 +764,30 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("", rows[1][2].ToString());
 		}
 
-		[Fact]
-		public void EscapeBOM()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EscapeBOM(string lineBreak)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-			EscapeBomWithEncoding(new UTF8Encoding(true));
-			EscapeBomWithEncoding(new UTF8Encoding(false));
-			EscapeBomWithEncoding(new UTF32Encoding(true, true));
-			EscapeBomWithEncoding(new UTF32Encoding(true, false));
-			EscapeBomWithEncoding(new UTF32Encoding(false, false));
-			EscapeBomWithEncoding(new UTF32Encoding(false, true));
-			EscapeBomWithEncoding(Encoding.GetEncoding(1252));
+			EscapeBomWithEncoding(new UTF8Encoding(true), lineBreak);
+			EscapeBomWithEncoding(new UTF8Encoding(false), lineBreak);
+			EscapeBomWithEncoding(new UTF32Encoding(true, true), lineBreak);
+			EscapeBomWithEncoding(new UTF32Encoding(true, false), lineBreak);
+			EscapeBomWithEncoding(new UTF32Encoding(false, false), lineBreak);
+			EscapeBomWithEncoding(new UTF32Encoding(false, true), lineBreak);
+			EscapeBomWithEncoding(Encoding.GetEncoding(1252), lineBreak);
 		}
 
-		[Fact]
-		public void MalformedHeader_SingleQuoteInMiddle()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void MalformedHeader_SingleQuoteInMiddle(string lineBreak)
 		{
-			string file = $"\"Col\"umn1\",Column2,Column3{Environment.NewLine},,";
+			string file = $"\"Col\"umn1\",Column2,Column3{lineBreak},,";
 
 			Assert.Throws<FormatException>(() =>
 			{
@@ -756,10 +811,13 @@ namespace Beffyman.DsvParser.Tests
 			});
 		}
 
-		[Fact]
-		public void MalformedData_ExtraColumns()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void MalformedData_ExtraColumns(string lineBreak)
 		{
-			string file = $"Column1,Column2{Environment.NewLine},,,,,";
+			string file = $"Column1,Column2{lineBreak},,,,,";
 
 			Assert.Throws<FormatException>(() =>
 			{
@@ -783,10 +841,13 @@ namespace Beffyman.DsvParser.Tests
 			});
 		}
 
-		[Fact]
-		public void MalformedData_Escapes()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void MalformedData_Escapes(string lineBreak)
 		{
-			string file = $"\"\"Column1\",Column2{Environment.NewLine}Data1,Data2";
+			string file = $"\"\"Column1\",Column2{lineBreak}Data1,Data2";
 
 			Assert.Throws<FormatException>(() =>
 			{
@@ -810,10 +871,13 @@ namespace Beffyman.DsvParser.Tests
 			});
 		}
 
-		[Fact]
-		public void DelimiterBetweenLines()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void DelimiterBetweenLines(string lineBreak)
 		{
-			string file = $"Column1,Column2{Environment.NewLine},{Environment.NewLine}Data1,Data2";
+			string file = $"Column1,Column2{lineBreak},{lineBreak}Data1,Data2";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -846,10 +910,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data2", rows[1][1].ToString());
 		}
 
-		[Fact]
-		public void DataHasLessColumnsThanHeader()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void DataHasLessColumnsThanHeader(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2";
+			string file = $"Column1,Column2,Column3{lineBreak}Data1,Data2";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -881,10 +948,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void MultipleLinesBetweenData()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void MultipleLinesBetweenData(string lineBreak)
 		{
-			string file = $"Column1,Column2{Environment.NewLine}{Environment.NewLine}Data1,Data2{Environment.NewLine}{Environment.NewLine}Data1,Data2";
+			string file = $"Column1,Column2{lineBreak}{lineBreak}Data1,Data2{lineBreak}{lineBreak}Data1,Data2";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -917,10 +987,51 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data2", rows[1][1].ToString());
 		}
 
-		[Fact]
-		public void EscapedEscape_Multiple()
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void BlankRowStartColumns(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}\"Da\"\"\"\"ta1\",\"Data2\"\"\"\"\",\"\"\"\"\"Da\"\"ta3\"";
+			string file = $",Column2{lineBreak}{lineBreak},Data2{lineBreak}{lineBreak},Data2";
+
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
+
+			List<ReadOnlyMemory<char>> columns = null;
+			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
+
+
+			while (data.MoveNext())
+			{
+				if (!data.ColumnsFilled)
+				{
+					columns = data.ReadLine().ToList();
+				}
+				else
+				{
+					rows.Add(data.ReadLine().ToList());
+				}
+			}
+
+			Assert.Equal(2, columns.Count);
+			Assert.Equal(2, rows.Count);
+
+			Assert.Equal("", columns[0].ToString());
+			Assert.Equal("Column2", columns[1].ToString());
+
+			Assert.Equal("", rows[0][0].ToString());
+			Assert.Equal("Data2", rows[0][1].ToString());
+
+			Assert.Equal("", rows[1][0].ToString());
+			Assert.Equal("Data2", rows[1][1].ToString());
+		}
+
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EscapedEscape_Multiple(string lineBreak)
+		{
+			string file = $"Column1,Column2,Column3{lineBreak}\"Da\"\"\"\"ta1\",\"Data2\"\"\"\"\",\"\"\"\"\"Da\"\"ta3\"";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -952,10 +1063,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("\"\"Da\"ta3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void EmptyDataFields()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EmptyDataFields(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,,Data3";
+			string file = $"Column1,Column2,Column3{lineBreak}Data1,,Data3";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -987,10 +1101,13 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-		[Fact]
-		public void EndsWithNewLine()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void EndsWithNewLine(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2,Data3{Environment.NewLine}";
+			string file = $"Column1,Column2,Column3{lineBreak}Data1,Data2,Data3{lineBreak}";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
@@ -1022,11 +1139,12 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data3", rows[0][2].ToString());
 		}
 
-
-		[Fact]
-		public void SpecialCharacters()
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void SpecialCharacters(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}Düsseldorf,Datüa2,ü123{Environment.NewLine}";
+			string file = $"Column1,Column2,Column3{lineBreak}Düsseldorf,Datüa2,ü123{lineBreak}";
 
 			var bytes = Encoding.UTF8.GetBytes(file);
 
@@ -1062,10 +1180,13 @@ namespace Beffyman.DsvParser.Tests
 
 
 
-		[Fact]
-		public void ReadLine()
+
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void ReadLine(string lineBreak)
 		{
-			string file = $"Column1,Column2,Column3{Environment.NewLine}Data1,Data2,Data3";
+			string file = $"Column1,Column2,Column3{lineBreak}Data1,Data2,Data3";
 
 			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 			int rows = 0;
