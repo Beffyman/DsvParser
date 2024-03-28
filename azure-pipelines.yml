@@ -47,11 +47,11 @@ steps:
    searchFolder: '$(Build.ArtifactStagingDirectory)/tests'
   displayName: 'Publish Test results'
 
-- task: PublishCodeCoverageResults@1
+- task: PublishCodeCoverageResults@2
   inputs:
     codeCoverageTool: cobertura
     summaryFileLocation: $(Build.ArtifactStagingDirectory)/tests/coverage.cobertura.xml
-    reportDirectory: $(Build.ArtifactStagingDirectory)/tests/Reports
+    #reportDirectory: $(Build.ArtifactStagingDirectory)/tests/Reports
     failIfCoverageEmpty: true
   displayName: 'Publish Code Coverage'
 

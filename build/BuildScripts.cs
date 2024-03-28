@@ -73,11 +73,6 @@ public class BuildScripts : NukeBuild
 					.Add("/p:UseSourceLink={0}", "true")
 					.Add("/p:CoverletOutputFormat={0}", "cobertura"))
 				.SetProjectFile(Solution));
-
-			if (CodeCoverageFile.FileExists())
-			{
-				Serilog.Log.Error("Code Coverage Report missing");
-			}
 		});
 
 	Target PerfTest => _ => _
