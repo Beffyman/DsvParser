@@ -44,19 +44,19 @@ steps:
   inputs:
    testResultsFormat: 'VSTest'
    testResultsFiles: '*.trx'
-   searchFolder: 'artifacts/tests'
+   searchFolder: '$(Build.ArtifactStagingDirectory)/tests'
   displayName: 'Publish Test results'
 
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: cobertura
-    summaryFileLocation: artifacts/tests/coverage.cobertura.xml
-    reportDirectory: artifacts/tests/Reports
+    summaryFileLocation: $(Build.ArtifactStagingDirectory)/tests/coverage.cobertura.xml
+    reportDirectory: $(Build.ArtifactStagingDirectory)/tests/Reports
     failIfCoverageEmpty: true
   displayName: 'Publish Code Coverage'
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathtoPublish: 'artifacts/nuget'
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
     artifactName: 'Nuget'
   displayName: 'Publish Packages'
