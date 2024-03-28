@@ -496,7 +496,7 @@ namespace Beffyman.DsvParser.Performance
 			{
 				while (csv.Read())
 				{
-					var numValues = csv.Context.ColumnCount;
+					var numValues = csv.ColumnCount;
 					for (var valueNum = 0; valueNum < numValues; valueNum++)
 					{
 						var value = csv[valueNum];

@@ -9,7 +9,7 @@
 
 	<!--Define nupkg -->
 	<PropertyGroup>
-		<Copyright>Copyright 2019</Copyright>
+		<Copyright>Copyright 2024</Copyright>
 		<Authors>Beffyman</Authors>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Beffyman/DsvParser</RepositoryUrl>

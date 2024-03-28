@@ -54,17 +54,17 @@ namespace Beffyman.DsvParser
 		}
 
 		/// <summary>
-		/// Default CSV options, comma separated, has headers, uses \r\n as the line break, and has 0 knowns
+		/// Default CSV options, comma separated, has headers, and has 0 knowns
 		/// </summary>
 		public readonly static DsvOptions DefaultCsvOptions = new DsvOptions(',', '"');
 
 		/// <summary>
-		/// Default CSV options, tab separated, has headers, uses \r\n as the line break, and has 0 knowns
+		/// Default CSV options, tab separated, has headers, and has 0 knowns
 		/// </summary>
 		public readonly static DsvOptions DefaultTsvOptions = new DsvOptions('\t', '"');
 
 		/// <summary>
-		/// Default CSV options, pipe separated, has headers, uses \r\n as the line break, and has 0 knowns
+		/// Default CSV options, pipe separated, has headers, and has 0 knowns
 		/// </summary>
 		public readonly static DsvOptions DefaultPsvOptions = new DsvOptions('|', '"');
 

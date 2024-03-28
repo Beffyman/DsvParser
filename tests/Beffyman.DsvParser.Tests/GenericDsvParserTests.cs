@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
@@ -43,7 +42,7 @@ namespace Beffyman.DsvParser.Tests
 		{
 			string data = $"c0,c1,c2,c3,c4{Environment.NewLine}1,1/1/2017,hello,true,02:10:01";
 
-			var parser = new DsvParser<Record, RecordMapping>(data.AsMemory(),Encoding.UTF8, DsvOptions.DefaultCsvOptions);
+			var parser = new DsvParser<Record, RecordMapping>(data.AsMemory(), Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 		}
 
 
@@ -166,7 +165,7 @@ namespace Beffyman.DsvParser.Tests
 
 			var parser = new DsvParser<Record, RecordMapping>(data, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
-			Assert.Equal(1, parser.Rows.Count);
+			Assert.Single(parser.Rows);
 
 			var record = parser.Rows[0];
 
@@ -184,7 +183,7 @@ namespace Beffyman.DsvParser.Tests
 
 			var parser = new DsvParser<Record, NoRecordMapping>(data, Encoding.UTF8, DsvOptions.DefaultCsvOptions);
 
-			Assert.Equal(1, parser.Rows.Count);
+			Assert.Single(parser.Rows);
 
 			var record = parser.Rows[0];
 
