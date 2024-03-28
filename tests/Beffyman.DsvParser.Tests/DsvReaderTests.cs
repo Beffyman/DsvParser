@@ -987,6 +987,44 @@ namespace Beffyman.DsvParser.Tests
 			Assert.Equal("Data2", rows[1][1].ToString());
 		}
 
+		[Theory]
+		[InlineData("\n")]
+		[InlineData("\r\n")]
+		public void BlankRowStartColumns(string lineBreak)
+		{
+			string file = $",Column2{lineBreak}{lineBreak},Data2{lineBreak}{lineBreak},Data2";
+
+			var data = new DsvReader(file, System.Text.Encoding.UTF8, DsvOptions.DefaultCsvOptions);
+
+			List<ReadOnlyMemory<char>> columns = null;
+			List<List<ReadOnlyMemory<char>>> rows = new List<List<ReadOnlyMemory<char>>>();
+
+
+			while (data.MoveNext())
+			{
+				if (!data.ColumnsFilled)
+				{
+					columns = data.ReadLine().ToList();
+				}
+				else
+				{
+					rows.Add(data.ReadLine().ToList());
+				}
+			}
+
+			Assert.Equal(2, columns.Count);
+			Assert.Equal(2, rows.Count);
+
+			Assert.Equal("", columns[0].ToString());
+			Assert.Equal("Column2", columns[1].ToString());
+
+			Assert.Equal("", rows[0][0].ToString());
+			Assert.Equal("Data2", rows[0][1].ToString());
+
+			Assert.Equal("", rows[1][0].ToString());
+			Assert.Equal("Data2", rows[1][1].ToString());
+		}
+
 
 		[Theory]
 		[InlineData("\n")]

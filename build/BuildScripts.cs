@@ -17,7 +17,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using Nuke.Common.CI.AzurePipelines;
 
-[CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 public class BuildScripts : NukeBuild
 {
@@ -71,10 +70,10 @@ public class BuildScripts : NukeBuild
 				.SetConfiguration(Configuration)
 				.EnableNoBuild()
 				.EnableNoRestore()
-				.SetLogger("trx")
+				.SetLoggers("trx")
 				.SetResultsDirectory(TestArtifactsDirectory)
-				.SetLogOutput(true)
-				.SetArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", "true")
+				.SetProcessLogOutput(true)
+				.SetProcessArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", "true")
 					.Add("/p:CoverletOutput={0}/", TestArtifactsDirectory)
 					.Add("/p:Threshold={0}", 90)
 					.Add("/p:Exclude=\"[xunit*]*%2c[*.Tests]*\"")
@@ -82,7 +81,10 @@ public class BuildScripts : NukeBuild
 					.Add("/p:CoverletOutputFormat={0}", "cobertura"))
 				.SetProjectFile(Solution));
 
-			FileExists(CodeCoverageFile);
+			if (CodeCoverageFile.FileExists())
+			{
+				Serilog.Log.Error("Code Coverage Report missing");
+			}
 		});
 
 	Target PerfTest => _ => _
@@ -90,7 +92,7 @@ public class BuildScripts : NukeBuild
 		.Executes(() =>
 		{
 			DotNetRun(s => s.SetConfiguration(Configuration.Release)
-				.SetWorkingDirectory(PerformanceProject));
+				.SetProcessWorkingDirectory(PerformanceProject));
 		});
 
 	Target Restore => _ => _
@@ -103,9 +105,9 @@ public class BuildScripts : NukeBuild
 	Target Clean => _ => _
 		.Executes(() =>
 		{
-			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			EnsureCleanDirectory(ArtifactsDirectory);
+			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+			ArtifactsDirectory.CreateOrCleanDirectory();
 		});
 
 	Target Build => _ => _
@@ -129,7 +131,7 @@ public class BuildScripts : NukeBuild
 			ReportGenerator(s => s.SetReports(CodeCoverageFile)
 								.SetTargetDirectory(CodeCoverageReportOutput)
 								.SetTag(GitVersion.NuGetVersionV2)
-								.SetFramework("netcoreapp3.0")
+								.SetFramework("net8.0")
 								.SetReportTypes(ReportTypes.HtmlInline_AzurePipelines_Dark));
 		});
 
